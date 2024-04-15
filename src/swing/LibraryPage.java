@@ -56,6 +56,16 @@ public class LibraryPage extends JFrame {
             }
         });
 
+        JButton addHoldingButton = new JButton("Add Holding");
+
+        addHoldingButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new AddContentPage(); 
+            }
+        });
+
+
         // Search Panel
         JPanel searchPanel = new JPanel(new BorderLayout());
         searchPanel.add(backButton, BorderLayout.WEST);
@@ -77,6 +87,7 @@ public class LibraryPage extends JFrame {
             JLabel holdingType = new JLabel("Type: Placeholder type"); // Type means book, article, or movie.
             JLabel totalCopiesLabel = new JLabel("Total Copies: Placeholder");
             JLabel availableCopiesLabel = new JLabel("Available Copies: Placeholder");
+            JLabel rentedOutCopiesLabel = new JLabel("Rented Out Copies: Placeholder");
 
             JButton addCopiesButton = new JButton("Add More Copies");
             addCopiesButton.addActionListener(new AddCopiesActionListener(titleLabel.getText()));
@@ -89,6 +100,7 @@ public class LibraryPage extends JFrame {
             holdingsPanel.add(holdingType);
             holdingsPanel.add(totalCopiesLabel);
             holdingsPanel.add(availableCopiesLabel);
+            holdingsPanel.add(rentedOutCopiesLabel);
             holdingsPanel.add(addCopiesButton);
             holdingsPanel.add(removeCopiesButton);
 
@@ -106,6 +118,8 @@ public class LibraryPage extends JFrame {
 
         add(searchPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
+        add(addHoldingButton, BorderLayout.SOUTH);
+    
 
         setSize(400, 400);
         setVisible(true);
@@ -147,7 +161,7 @@ public class LibraryPage extends JFrame {
             this.title = title;
         }
 
-        // Code to add when removing copies to a book
+        // Code to add when removing copies to a book. Ideally if we choose to remove all copies, this would be removed from the library.
         @Override
         public void actionPerformed(ActionEvent e) {
             String num = JOptionPane.showInputDialog(LibraryPage.this, "How many copies do you want to remove from " + title + "?", null);

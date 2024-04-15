@@ -75,6 +75,7 @@ public class ArticlesPage extends JFrame {
             JLabel titleLabel = new JLabel("Title: Placeholder Title" + i);
             JLabel authorLabel = new JLabel("Author: Placeholder Author");
             JLabel volumeLabel = new JLabel("ISBN: Placeholder Volume");
+            JLabel yearOfReleaseLabel = new JLabel("Year of Release: ");
             JLabel issueLabel = new JLabel("Genre: Placeholder Issue");
             JLabel totalCopiesLabel = new JLabel("Total Copies: Placeholder");
             JLabel availableCopiesLabel = new JLabel("Available Copies: Placeholder");
@@ -82,12 +83,13 @@ public class ArticlesPage extends JFrame {
             JButton rentButton = new JButton("Rent");
             rentButton.addActionListener(new RentButtonActionListener
             (titleLabel.getText(), authorLabel.getText(), 
-            volumeLabel.getText(), issueLabel.getText(), 
+            volumeLabel.getText(), yearOfReleaseLabel.getText(), issueLabel.getText(), 
             totalCopiesLabel.getText(), availableCopiesLabel.getText()));
 
             articlePanel.add(titleLabel);
             articlePanel.add(authorLabel);
             articlePanel.add(volumeLabel);
+            articlePanel.add(yearOfReleaseLabel);
             articlePanel.add(issueLabel);
             articlePanel.add(totalCopiesLabel);
             articlePanel.add(availableCopiesLabel);
@@ -119,14 +121,16 @@ public class ArticlesPage extends JFrame {
         private String title;
         private String author;
         private String volume;
+        private String yearOfRelease;
         private String issue;
         private String totalCopies;
         private String availableCopies;
 
-        public RentButtonActionListener(String title, String author, String isbn, String genre, String totalCopies, String availableCopies) {
+        public RentButtonActionListener(String title, String author, String volume ,String yearOfRelease, String genre, String totalCopies, String availableCopies) {
             this.title = title;
             this.author = author;
-            this.volume = isbn;
+            this.volume = volume;
+            this.yearOfRelease = yearOfRelease;
             this.issue = genre;
             this.totalCopies = totalCopies;
             this.availableCopies = availableCopies;
