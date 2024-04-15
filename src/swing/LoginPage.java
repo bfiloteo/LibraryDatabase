@@ -36,7 +36,11 @@ public class LoginPage extends JFrame {
                 if (enteredUsername.equals("test") && enteredPassword.equals("123")) {
                     JOptionPane.showMessageDialog(LoginPage.this, "Login successful", "Success", JOptionPane.INFORMATION_MESSAGE);
                     dispose();
-                    new DashboardPage(); // Opens the dashboard page ui
+                    new DashboardPage(); // Opens the librarian page ui
+                }else if (enteredUsername.equals("admin") && enteredPassword.equals("123")) {
+                    JOptionPane.showMessageDialog(LoginPage.this, "Admin Login successful", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    dispose();
+                    new LibrarianPage();
                 } else {
                     JOptionPane.showMessageDialog(LoginPage.this, "Invalid email or password", "Error", JOptionPane.ERROR_MESSAGE);
                 }

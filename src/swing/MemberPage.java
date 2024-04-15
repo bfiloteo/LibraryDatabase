@@ -8,9 +8,9 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class AccountInfoPage extends JFrame {
+public class MemberPage extends JFrame {
 
-    public AccountInfoPage() {
+    public MemberPage() {
         super("Account Info");
 
         JButton backButton = new JButton("Back to Main Menu");
@@ -47,12 +47,17 @@ public class AccountInfoPage extends JFrame {
 
             JLabel titleLabel = new JLabel("Title: Placeholder Title " + (i + 1));
             JLabel creatorLabel = new JLabel("Author: Placeholder Creator " + (i + 1));
+            JLabel rentedDateLabel = new JLabel("Date of Rent: Placeholder Date");
+            JLabel dueDateLabel = new JLabel("Due Date: Placeholder Date");
 
             JButton returnButton = new JButton("Return");
             returnButton.addActionListener(new ReturnButtonActionListener(titleLabel.getText(), creatorLabel.getText()));
 
             rentedPanel.add(titleLabel);
             rentedPanel.add(creatorLabel);
+            rentedPanel.add(rentedDateLabel);
+            rentedPanel.add(dueDateLabel);
+            rentedPanel.add(returnButton);
 
 
             rentedPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));

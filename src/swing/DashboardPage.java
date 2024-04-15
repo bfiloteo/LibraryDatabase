@@ -47,7 +47,7 @@ public class DashboardPage {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dashBoardFrame.dispose();
-                new AccountInfoPage();
+                new MemberPage();
             }
         });
 
