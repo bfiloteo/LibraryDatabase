@@ -1,3 +1,5 @@
+package database;
+
 public class StarterDatabase {
     public static void main(String[] args) throws Exception {
         System.out.println("Hello, World!");
