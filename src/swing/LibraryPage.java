@@ -38,7 +38,8 @@ public class LibraryPage extends JFrame {
             }
         });
 
-        // Swing does not offer their own "placeholder text" feature for the search bars so you have to do this instead where it will simply remove the text if the person decides to
+        // Swing does not offer their own "placeholder text" feature for the search bars
+        // so you have to do this instead where it will simply remove the text if the person decides to
         // type anything in and replaces it with the placeholder text if nothing was typed in.
         searchField.addFocusListener(new FocusListener() {
             @Override
@@ -76,7 +77,8 @@ public class LibraryPage extends JFrame {
         JPanel libraryPanel = new JPanel();
         libraryPanel.setLayout(new BoxLayout(libraryPanel, BoxLayout.Y_AXIS));
 
-        // This is how you add all the things our library has into a list like view. This is in a set size for placeholder purposes,
+        // This is how you add all the things our library has into a list like view.
+        // This is in a set size for placeholder purposes,
         // but will change when functionality comes in after searching for a specific book/article/movie
         for (int i = 0; i < 10; i++) { 
             JPanel holdingsPanel = new JPanel();
@@ -126,7 +128,8 @@ public class LibraryPage extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
-    // This class ensures that each button to the book will be it's own button to the corresponding book, so that when the librarian decides to add copies to the book,
+    // This class ensures that each button to the book will be it's own button to the corresponding book,
+    // so that when the librarian decides to add copies to the book,
     // it will only add more copies to the specific book.
 
     private class AddCopiesActionListener implements ActionListener {
@@ -152,7 +155,8 @@ public class LibraryPage extends JFrame {
         }
     }
 
-    // This class ensures that each button to the book will be it's own button to the corresponding book, so that when the librarian decides to remove copies to the book,
+    // This class ensures that each button to the book will be it's own button to the corresponding book,
+    // so that when the librarian decides to remove copies to the book,
     // it will only remove more copies to the specific book.
     private class RemoveCopiesActionListener implements ActionListener {
         private String title;
@@ -161,7 +165,8 @@ public class LibraryPage extends JFrame {
             this.title = title;
         }
 
-        // Code to add when removing copies to a book. Ideally if we choose to remove all copies, this would be removed from the library.
+        // Code to add when removing copies to a book.
+        // Ideally if we choose to remove all copies, this would be removed from the library.
         @Override
         public void actionPerformed(ActionEvent e) {
             String num = JOptionPane.showInputDialog(LibraryPage.this, "How many copies do you want to remove from " + title + "?", null);

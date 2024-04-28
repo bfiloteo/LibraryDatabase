@@ -55,10 +55,12 @@ public class AddContentPage extends JFrame {
                 String isbn = isbnField.getText();
                 String copies = copiesField.getText();
 
-                // Add code here to double check if the inputs entered are valid. We can figure out later how we can add 
-                // them as files or downloadables for the people to access them. I'll leave this here as an example. Do note that some of the input panels
-                // can remain empty as not all prompts are applicable to each content type. For example, we dont need to know the volume for a movie
-                // compared to a book/article
+                // Add code here to double check if the inputs entered are valid.
+                // We can figure out later how we can add them as files or downloadables
+                // for the people to access them.
+                // I'll leave this here as an example. Do note that some of the input panels
+                // can remain empty as not all prompts are applicable to each content type.
+                // For example, we dont need to know the volume for a movie compared to a book/article
 
                 try {
                     int number = Integer.parseInt(copies);
