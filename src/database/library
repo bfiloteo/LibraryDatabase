@@ -23,9 +23,9 @@ CREATE TABLE Librarian (
 
 CREATE TABLE Books (
     BookID INT PRIMARY KEY,
-    Genre VARCHAR(50),
     Title VARCHAR(100),
     Author VARCHAR(100),
+    Genre VARCHAR(50),
     ISBN VARCHAR(20),
     TotalCopies INT,
     AvailableCopies INT

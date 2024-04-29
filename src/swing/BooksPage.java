@@ -2,21 +2,27 @@ package swing;
 import library.*;
 
 import javax.swing.*;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
 import java.util.ArrayList;
 import java.awt.event.*;
+import java.sql.*;
 
 public class BooksPage extends JFrame {
     private JTextField searchField;
+    private JPanel allBooksPanel = null;
+    ArrayList<Book> books;
+    private Connection conn = null;
+    private Statement stmt = null;
+    private ResultSet rs = null;
 
     public BooksPage() {
         super("Books");
+        createSQLConnection();
+        books = new ArrayList<>();
+
+        // Books Panel
+        allBooksPanel = new JPanel();
+        allBooksPanel.setLayout(new BoxLayout(allBooksPanel, BoxLayout.Y_AXIS));
 
         searchField = new JTextField("Enter the book's title, author, or genre...");
         searchField.setMinimumSize(new Dimension(200, searchField.getPreferredSize().height));
@@ -36,6 +42,8 @@ public class BooksPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Add functionality code here for when the user searches for a book
+                CreateSqlQuery(searchField.getText());
+                updateAllBooksPanel();
             }
         });
 
@@ -64,29 +72,28 @@ public class BooksPage extends JFrame {
         searchPanel.add(searchField, BorderLayout.CENTER);
         searchPanel.add(searchButton, BorderLayout.EAST);
         
-        // Book Panel
-        JPanel allBooksPanel = new JPanel();
-        allBooksPanel.setLayout(new BoxLayout(allBooksPanel, BoxLayout.Y_AXIS));
+        // Scrollbar feature
+        JScrollPane scrollPane = new JScrollPane(allBooksPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-        // Placeholder code for SQL query
-        ArrayList<Book> books = new ArrayList<>();
-        for (int i = 0; i < 15; i++)
-        {
-            Book book = new Book();
-            book.setTitle("Title: Placeholder Title" + i);
-            book.setAuthor("Author: Placeholder Author" + i);
-            book.setISBN(i);
-            book.setGenre("Genre: Placeholder Genre");
-            book.setAvailableCopies(i);
-            book.setTotalCopies(i);
-            books.add(book);
-        }
+        setLayout(new BorderLayout());
+
+        add(searchPanel, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
+
+        setSize(400, 400);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }
+
+    private void updateAllBooksPanel()
+    {
+        allBooksPanel.removeAll();
 
         // This is how you add a book into a list like view.
         // This is in a set size for placeholder purposes,
         // but will change when functionality comes in after searching for a specific book
         for (Book book : books) {
-            
             JPanel bookPanel = new JPanel();
             bookPanel.setLayout(new GridLayout(6, 1));
 
@@ -115,21 +122,12 @@ public class BooksPage extends JFrame {
             allBooksPanel.add(bookPanel);
         }
 
-        // Scrollbar feature
-        JScrollPane scrollPane = new JScrollPane(allBooksPanel);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
-        setLayout(new BorderLayout());
-
-        add(searchPanel, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
-
-        setSize(400, 400);
-        setVisible(true);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        revalidate();
+        repaint();
     }
-
-    // This class ensures that each button to the book will be it's own button to the corresponding book, so that when the user decides to rent the book,
+    
+    // This class ensures that each button to the book will be its own button to the corresponding book,
+    // so that when the user decides to rent the book,
     // the button to rent it will know what book the user chose.
     private class RentButtonActionListener implements ActionListener {
         private String title;
@@ -154,4 +152,101 @@ public class BooksPage extends JFrame {
             System.out.println("Title: " + title);
         }
     }
+
+    private void createSQLConnection()
+    {
+        try
+        {
+            // The newInstance() call is a work around for some broken Java implementations.
+            // default for running on local:
+            //conn = DriverManager.getConnection("jdbc:mysql://localhost/<database name>?" +
+            //"user=<username: may be root>&password=<password>");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=329761");
+            Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
+        }
+        catch (SQLException ex)
+        {
+            // handle the error
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error." + e.getMessage());
+        }
+    }   
+
+    // Search: SQL Query
+    // Search call for using the search bar in articles page.
+    private void CreateSqlQuery(String searchText)
+    {
+        String[] searchWords = searchText.split(" ");
+
+        String stmtString = "SELECT Author, Title, Genre, TotalCopies, AvailableCopies FROM Books " + 
+                            "WHERE Title LIKE \"%" + searchWords[0] + "%\" OR Author LIKE \"%" + searchWords[0] + "%\" OR Genre LIKE \"%" + searchWords[0] + "%\"";
+        for (int i = 1; i < searchWords.length; i++)
+            stmtString += "OR Title LIKE \"%" + searchWords[i] + "%\" OR Author LIKE \"%" + searchWords[i] + "%\" OR Genre LIKE \"%" + searchWords[i] + "%\"";
+        stmtString += ";";
+        
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(stmtString);
+        
+            // Now do something with the ResultSet ....
+            if (rs != null) {
+                ResultSetMetaData md = rs.getMetaData();
+                int cols = md.getColumnCount();
+                System.out.println("Columns = " + cols);
+                for (int i = 0; i < cols; i++) {
+                    String name = md.getColumnLabel(i + 1);
+                    System.out.print(name + "\t");
+                }
+
+                System.out.println("");
+                books.clear(); // remove previous search results
+                while (rs.next()) {
+                    System.out.print("Row\t");
+                    for (int i = 0; i < cols; i++) {
+                        String value = rs.getString(i + 1);
+                        System.out.print(value + "\t");
+                    }
+                    System.out.println("");
+                    // Placeholder code for SQL query
+                    Book book = new Book();
+                    book.setTitle(rs.getString(1));
+                    book.setAuthor(rs.getString(2));
+                    book.setGenre(rs.getString(3));
+                    book.setTotalCopies(rs.getInt(4));
+                    book.setAvailableCopies(rs.getInt(5));
+                    books.add(book);
+                }
+            }
+        }
+        catch (SQLException ex) {
+            // handle any errors
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        finally {
+            // Release resources in a finally{} block in reverse-order of their creation
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException sqlEx) { } // ignore
+        
+                rs = null;
+            }
+        
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException sqlEx) { } // ignore
+        
+                stmt = null;
+            }
+        }
+    }
+        
 }

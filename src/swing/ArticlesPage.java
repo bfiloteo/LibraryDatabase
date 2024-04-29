@@ -2,9 +2,6 @@ package swing;
 import library.*;
 
 import javax.swing.*;
-
-import com.mysql.cj.xdevapi.SelectStatement;
-
 import java.awt.*;
 import java.util.ArrayList;
 import java.awt.event.*;
@@ -75,16 +72,16 @@ public class ArticlesPage extends JFrame {
         searchPanel.add(searchField, BorderLayout.CENTER);
         searchPanel.add(searchButton, BorderLayout.EAST);
         
-        setLayout(new BorderLayout());
-
-        add(searchPanel, BorderLayout.NORTH);
-
         // Scrollbar feature
         JScrollPane scrollPane = new JScrollPane(allArticlesPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        setLayout(new BorderLayout());
+
+        add(searchPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
 
-        setSize(1000, 1000);
+        setSize(1200, 1000);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
@@ -92,6 +89,7 @@ public class ArticlesPage extends JFrame {
     private void updateAllArticlesPanel()
     {
         allArticlesPanel.removeAll();
+
         // Add articles into a list like view.
         for (Article article : articles) { 
             JPanel articlePanel = new JPanel();
