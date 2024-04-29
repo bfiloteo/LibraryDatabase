@@ -6,9 +6,9 @@ public class Article {
     private String author;
     private String title;
     private int volume;
+    private String issue;
     private int availableCopies;
     private int totalCopies;
-    private int issue;
 
     // No-arg constructor (default constructor)
     public Article() {
@@ -18,7 +18,7 @@ public class Article {
         volume = 0;
         availableCopies = 0;
         totalCopies = 0;
-        issue = 0;
+        issue = "";
     }
 
     // Getters
@@ -46,7 +46,7 @@ public class Article {
         return totalCopies;
     }
 
-    public int getIssue() {
+    public String getIssue() {
         return issue;
     }
 
@@ -67,6 +67,10 @@ public class Article {
         this.volume = volume;
     }
 
+    public void setIssue(String issue) {
+        this.issue = issue;
+    }
+
     public void setAvailableCopies(int availableCopies) {
         this.availableCopies = availableCopies;
     }
@@ -75,7 +79,4 @@ public class Article {
         this.totalCopies = totalCopies;
     }
 
-    public void setIssue(int issue) {
-        this.issue = issue;
-    }
 }

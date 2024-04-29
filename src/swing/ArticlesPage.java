@@ -1,23 +1,29 @@
 package swing;
+import library.*;
 
 import javax.swing.*;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import com.mysql.cj.xdevapi.SelectStatement;
 
+import java.awt.*;
+import java.util.ArrayList;
 import java.awt.event.*;
+import java.sql.*;
 
 public class ArticlesPage extends JFrame {
     private JTextField searchField;
+    private JPanel allArticlesPanel = null;
+    ArrayList<Article> articles;    
+    private Connection conn = null;
+    private Statement stmt = null;
+    private ResultSet rs = null;
 
     public ArticlesPage() {
         super("Articles");
+        createSQLConnection();
+        articles = new ArrayList<>();
 
-        searchField = new JTextField("Enter the articles's title, author, or genre...");
+        searchField = new JTextField("Enter the articles's title or author...");
         searchField.setMinimumSize(new Dimension(200, searchField.getPreferredSize().height));
 
         JButton backButton = new JButton("Back to Main Menu");
@@ -30,15 +36,18 @@ public class ArticlesPage extends JFrame {
                 new DashboardPage(); 
             }
         });
-
+        
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Add functionality code here for when the user searches for an article
+                CreateSqlQuery(searchField.getText());
+                AddAllArticlesPanel();
             }
         });
 
-        // Swing does not offer their own "placeholder text" feature for the search bars so you have to do this instead where it will simply remove the text if the person decides to
+        // Swing does not offer their own "placeholder text" feature for the search bars
+        // so you have to do this instead where it will simply remove the text if the person decides to
         // type anything in and replaces it with the placeholder text if nothing was typed in.
         searchField.addFocusListener(new FocusListener() {
             @Override
@@ -62,40 +71,50 @@ public class ArticlesPage extends JFrame {
         searchPanel.add(searchField, BorderLayout.CENTER);
         searchPanel.add(searchButton, BorderLayout.EAST);
         
+        setLayout(new BorderLayout());
+
+        add(searchPanel, BorderLayout.NORTH);
+
+        setSize(400, 400);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }
+
+    private void AddAllArticlesPanel()
+    {
         // Articles Panel
-        JPanel allArticlesPanel = new JPanel();
+        if(allArticlesPanel != null)
+            remove(allArticlesPanel);
+        allArticlesPanel = new JPanel();
         allArticlesPanel.setLayout(new BoxLayout(allArticlesPanel, BoxLayout.Y_AXIS));
 
-        // This is how you add a article into a list like view. This is in a set size for placeholder purposes,
-        // but will change when functionality comes in after searching for a specific book
-        for (int i = 0; i < 15; i++) { 
+        // Add articles into a list like view.
+        for (Article article : articles) { 
             JPanel articlePanel = new JPanel();
             articlePanel.setLayout(new GridLayout(6, 1));
 
-            JLabel titleLabel = new JLabel("Title: Placeholder Title" + i);
-            JLabel authorLabel = new JLabel("Author: Placeholder Author");
-            JLabel volumeLabel = new JLabel("ISBN: Placeholder Volume");
-            JLabel yearOfReleaseLabel = new JLabel("Year of Release: ");
-            JLabel issueLabel = new JLabel("Genre: Placeholder Issue");
-            JLabel totalCopiesLabel = new JLabel("Total Copies: Placeholder");
-            JLabel availableCopiesLabel = new JLabel("Available Copies: Placeholder");
+            JLabel titleLabel = new JLabel(article.getTitle());
+            JLabel authorLabel = new JLabel(article.getAuthor());
+            JLabel volumeLabel = new JLabel("" + article.getVolume());
+            JLabel issueLabel = new JLabel(article.getIssue());
+            JLabel totalCopiesLabel = new JLabel("" + article.getTotalCopies());
+            JLabel availableCopiesLabel = new JLabel("" + article.getAvailableCopies());
 
             JButton rentButton = new JButton("Rent");
             rentButton.addActionListener(new RentButtonActionListener
-            (titleLabel.getText(), authorLabel.getText(), 
-            volumeLabel.getText(), yearOfReleaseLabel.getText(), issueLabel.getText(), 
-            totalCopiesLabel.getText(), availableCopiesLabel.getText()));
+            (titleLabel.getText(), authorLabel.getText(),
+             volumeLabel.getText(), issueLabel.getText(), 
+             totalCopiesLabel.getText(), availableCopiesLabel.getText()));
 
             articlePanel.add(titleLabel);
             articlePanel.add(authorLabel);
             articlePanel.add(volumeLabel);
-            articlePanel.add(yearOfReleaseLabel);
             articlePanel.add(issueLabel);
             articlePanel.add(totalCopiesLabel);
             articlePanel.add(availableCopiesLabel);
             articlePanel.add(rentButton);
 
-            // Creates the black like between each article
+            // Creates the black line between each article
             articlePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
             allArticlesPanel.add(articlePanel);
@@ -104,33 +123,26 @@ public class ArticlesPage extends JFrame {
         // Scrollbar feature
         JScrollPane scrollPane = new JScrollPane(allArticlesPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
-        setLayout(new BorderLayout());
-
-        add(searchPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
-
-        setSize(400, 400);
-        setVisible(true);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        revalidate();
+        repaint();
     }
 
-    // This class ensures that each button to the book will be it's own button to the corresponding book, so that when the user decides to rent the book,
+    // This class ensures that each button to the book will be its own button to the corresponding book,
+    // so that when the user decides to rent the book,
     // the button to rent it will know what book the user chose.
     private class RentButtonActionListener implements ActionListener {
         private String title;
         private String author;
         private String volume;
-        private String yearOfRelease;
         private String issue;
         private String totalCopies;
         private String availableCopies;
 
-        public RentButtonActionListener(String title, String author, String volume ,String yearOfRelease, String genre, String totalCopies, String availableCopies) {
+        public RentButtonActionListener(String title, String author, String volume, String genre, String totalCopies, String availableCopies) {
             this.title = title;
             this.author = author;
             this.volume = volume;
-            this.yearOfRelease = yearOfRelease;
             this.issue = genre;
             this.totalCopies = totalCopies;
             this.availableCopies = availableCopies;
@@ -140,6 +152,94 @@ public class ArticlesPage extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
             System.out.println("Title: " + title);
+        }
+    }
+
+    private void createSQLConnection()
+    {
+        try
+        {
+            // The newInstance() call is a work around for some
+            // broken Java implementations
+            // default: conn = DriverManager.getConnection("jdbc:mysql://localhost/<database name>?" + "user=<username: may be root>&password=<password>");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=329761");
+            Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
+        }
+        catch (SQLException ex)
+        {
+            // handle the error
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        catch (Exception e)
+        {
+            System.out.println("Error." + e.getMessage());
+        }
+    }   
+
+    private void CreateSqlQuery(String searchText)
+    {
+        String stmtString = "SELECT Author, Title, Volume, Issue, TotalCopies, AvailableCopies FROM Articles " + 
+                            "WHERE Title LIKE \"%" + searchText + "%\" OR Author LIKE \"%" + searchText + "%\";";
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(stmtString);
+        
+            // Now do something with the ResultSet ....
+            if (rs != null) {
+                ResultSetMetaData md = rs.getMetaData();
+                int cols = md.getColumnCount();
+                System.out.println("Columns = " + cols);
+                for (int i = 0; i < cols; i++) {
+                    String name = md.getColumnLabel(i + 1);
+                    System.out.print(name + "\t");
+                }
+
+                System.out.println("");
+                articles.clear(); // remove previous search results
+                while (rs.next()) {
+                    System.out.print("Row\t");
+                    for (int i = 0; i < cols; i++) {
+                        String value = rs.getString(i + 1);
+                        System.out.print(value + "\t");
+                    }
+                    System.out.println("");
+                    Article article = new Article();
+                    // Column indexes must match order of SELECT query, starting from index 1
+                    article.setAuthor(rs.getString(1));
+                    article.setTitle(rs.getString(2));
+                    article.setVolume(rs.getInt(3));
+                    article.setIssue(rs.getString(4));
+                    article.setTotalCopies(rs.getInt(5));
+                    article.setAvailableCopies(rs.getInt(6));
+                    articles.add(article);
+                }
+            }
+        }
+        catch (SQLException ex) {
+            // handle any errors
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+        }
+        finally {
+            // Release resources in a finally{} block in reverse-order of their creation
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException sqlEx) { } // ignore
+        
+                rs = null;
+            }
+        
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException sqlEx) { } // ignore
+        
+                stmt = null;
+            }
         }
     }
 }

@@ -68,4 +68,5 @@ public class Movie {
     public void setTotalCopies(int newTotalCopies) {
         totalCopies = newTotalCopies;
     }
+
 }

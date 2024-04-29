@@ -1,4 +1,5 @@
 package swing;
+import library.*;
 
 import javax.swing.*;
 
@@ -8,7 +9,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.util.ArrayList;
 import java.awt.event.*;
 
 public class BooksPage extends JFrame {
@@ -38,7 +39,8 @@ public class BooksPage extends JFrame {
             }
         });
 
-        // Swing does not offer their own "placeholder text" feature for the search bars so you have to do this instead where it will simply remove the text if the person decides to
+        // Swing does not offer their own "placeholder text" feature for the search bars
+        // so you have to do this instead where it will simply remove the text if the person decides to
         // type anything in and replaces it with the placeholder text if nothing was typed in.
         searchField.addFocusListener(new FocusListener() {
             @Override
@@ -66,29 +68,42 @@ public class BooksPage extends JFrame {
         JPanel allBooksPanel = new JPanel();
         allBooksPanel.setLayout(new BoxLayout(allBooksPanel, BoxLayout.Y_AXIS));
 
-        // This is how you add a book into a list like view. This is in a set size for placeholder purposes,
+        // Placeholder code for SQL query
+        ArrayList<Book> books = new ArrayList<>();
+        for (int i = 0; i < 15; i++)
+        {
+            Book book = new Book();
+            book.setTitle("Title: Placeholder Title" + i);
+            book.setAuthor("Author: Placeholder Author" + i);
+            book.setISBN(i);
+            book.setGenre("Genre: Placeholder Genre");
+            book.setAvailableCopies(i);
+            book.setTotalCopies(i);
+            books.add(book);
+        }
+
+        // This is how you add a book into a list like view.
+        // This is in a set size for placeholder purposes,
         // but will change when functionality comes in after searching for a specific book
-        for (int i = 0; i < 15; i++) { 
+        for (Book book : books) {
             
             JPanel bookPanel = new JPanel();
             bookPanel.setLayout(new GridLayout(6, 1));
 
-            JLabel titleLabel = new JLabel("Title: Placeholder Title" + i);
-            JLabel authorLabel = new JLabel("Author: Placeholder Author");
-            JLabel isbnLabel = new JLabel("ISBN: Placeholder ISBN");
-            JLabel yearOfReleaseLabel = new JLabel("Year of Release: Placeholder Year");
-            JLabel genreLabel = new JLabel("Genre: Placeholder Genre");
-            JLabel totalCopiesLabel = new JLabel("Total Copies: Placeholder");
-            JLabel availableCopiesLabel = new JLabel("Available Copies: Placeholder");
-
+            JLabel titleLabel = new JLabel(book.getTitle());
+            JLabel authorLabel = new JLabel(book.getAuthor());
+            JLabel isbnLabel = new JLabel("" + book.getISBN());
+            JLabel genreLabel = new JLabel(book.getGenre());
+            JLabel availableCopiesLabel = new JLabel("" + book.getAvailableCopies());
+            JLabel totalCopiesLabel = new JLabel("" + book.getTotalCopies());
+            
             JButton rentButton = new JButton("Rent");
             rentButton.addActionListener(new RentButtonActionListener(titleLabel.getText(), authorLabel.getText(), 
-            isbnLabel.getText(), yearOfReleaseLabel.getText(), genreLabel.getText(), totalCopiesLabel.getText(), availableCopiesLabel.getText()));
+            isbnLabel.getText(), genreLabel.getText(), totalCopiesLabel.getText(), availableCopiesLabel.getText()));
 
             bookPanel.add(titleLabel);
             bookPanel.add(authorLabel);
             bookPanel.add(isbnLabel);
-            bookPanel.add(yearOfReleaseLabel);
             bookPanel.add(genreLabel);
             bookPanel.add(totalCopiesLabel);
             bookPanel.add(availableCopiesLabel);
@@ -120,16 +135,14 @@ public class BooksPage extends JFrame {
         private String title;
         private String author;
         private String isbn;
-        private String yearofRelease;
         private String genre;
         private String totalCopies;
         private String availableCopies;
 
-        public RentButtonActionListener(String title, String author, String isbn, String yearOfRelease, String genre, String totalCopies, String availableCopies) {
+        public RentButtonActionListener(String title, String author, String isbn, String genre, String totalCopies, String availableCopies) {
             this.title = title;
             this.author = author;
             this.isbn = isbn;
-            this.yearofRelease = yearOfRelease;
             this.genre = genre;
             this.totalCopies = totalCopies;
             this.availableCopies = availableCopies;

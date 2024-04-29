@@ -1,4 +1,5 @@
 package swing;
+import library.*;
 
 import javax.swing.*;
 
@@ -7,6 +8,7 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class TransactionPage extends JFrame {
 
@@ -33,21 +35,33 @@ public class TransactionPage extends JFrame {
         JPanel allTransactionsPanel = new JPanel();
         allTransactionsPanel.setLayout(new BoxLayout(allTransactionsPanel, BoxLayout.Y_AXIS));
 
-        // This is how you add the transactions into a list like view. This is in a set size for placeholder purposes,
+        // Placeholder code for SQL query
+        ArrayList<Transaction> transactions = new ArrayList<>();
+        for (int i = 0; i < 15; i++)
+        {
+            Transaction transaction = new Transaction();
+            transaction.setTransactionType("" + i);
+            transaction.setTransactionDate(null);
+            transaction.setBookId(i);
+            transaction.setMovieId(i);
+            transaction.setArticleId(i);
+            transaction.setMemberId(i);
+
+            transactions.add(transaction);
+        }
+
+        // This is how you add the transactions into a list like view.
+        // This is in a set size for placeholder purposes,
         // but will change when functionality comes in after searching for a specific book
-        for (int i = 0; i < 5; i++) { 
+        for (Transaction transaction : transactions) { 
             JPanel transactionPanel = new JPanel();
             transactionPanel.setLayout(new GridLayout(6, 1));
 
-            JLabel titleLabel = new JLabel("Title: Placeholder Title" + i);
-            JLabel authorLabel = new JLabel("Author: Placeholder Author");
-            JLabel isbnLabel = new JLabel("ISBN: Placeholder ISBN");
+            JLabel isbnLabel = new JLabel("" + transaction.getBookId());
             JLabel rentedDate = new JLabel("Date of Rent: Placeholder Date");
             JLabel returnDate = new JLabel("Date of Return: Placeholder Date");
             JLabel returnLabel = new JLabel("Return Status");
 
-            transactionPanel.add(titleLabel);
-            transactionPanel.add(authorLabel);
             transactionPanel.add(isbnLabel);
             transactionPanel.add(rentedDate);
             transactionPanel.add(returnDate);

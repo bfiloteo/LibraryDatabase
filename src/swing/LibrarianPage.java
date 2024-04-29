@@ -1,4 +1,5 @@
 package swing;
+import library.*;
 
 import javax.swing.*;
 
@@ -6,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class LibrarianPage extends JFrame {
 
@@ -22,45 +24,62 @@ public class LibrarianPage extends JFrame {
             }
         });
 
+        // Placeholder code for SQL query
+        ArrayList<Librarian> librarians = new ArrayList<>();
+        for (int i = 0; i < 15; i++)
+        {
+            Librarian librarian = new Librarian();
+            librarian.setLibrarianId(i);
+            librarian.setFirstName("First Name: " + i);
+            librarian.setLastName("Last Name: " + i);
+            librarian.setEmail("Email: ");
+            librarians.add(librarian);
+        }
 
-        JLabel firstNameLabel = new JLabel("First Name: ");
-        JLabel lastNameLabel = new JLabel("Last Name: ");
-        JLabel emailLabel = new JLabel("Email: ");
+        for (Librarian librarian : librarians)
+        {
+            JLabel firstNameLabel = new JLabel(librarian.getFirstName());
+            JLabel lastNameLabel = new JLabel(librarian.getLastName());
+            JLabel emailLabel = new JLabel(librarian.getEmail());
+        
 
-        JPanel librarianPanel = new JPanel();
-        librarianPanel.setLayout(new GridLayout(3, 2));
+            JPanel librarianPanel = new JPanel();
+            librarianPanel.setLayout(new GridLayout(3, 2));
 
-        librarianPanel.add(logoutButton);
-        librarianPanel.add(firstNameLabel);
-        librarianPanel.add(lastNameLabel);
-        librarianPanel.add(emailLabel);
+            librarianPanel.add(logoutButton);
+            librarianPanel.add(firstNameLabel);
+            librarianPanel.add(lastNameLabel);
+            librarianPanel.add(emailLabel);
+        
 
-        JButton viewMembersButton = new JButton("View Members");
-        viewMembersButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose(); 
-                new AllMembersPage(); 
-            }
-        });
+            JButton viewMembersButton = new JButton("View Members");
+            viewMembersButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    dispose(); 
+                    new AllMembersPage(); 
+                }
+            });
 
-        librarianPanel.add(viewMembersButton);
+            librarianPanel.add(viewMembersButton);
+        
 
-        JButton editLibraryButton = new JButton("Edit Library Page");
+            JButton editLibraryButton = new JButton("Edit Library Page");
 
-        editLibraryButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose(); 
-                new LibraryPage(); 
-            }
-        });
+            editLibraryButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    dispose(); 
+                    new LibraryPage(); 
+                }
+            });
 
-        librarianPanel.add(editLibraryButton);
+            librarianPanel.add(editLibraryButton);
 
-        setLayout(new BorderLayout());
-        add(librarianPanel, BorderLayout.NORTH);
-
+            setLayout(new BorderLayout());
+            add(librarianPanel, BorderLayout.NORTH);
+        }
+        
         setSize(400, 300);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

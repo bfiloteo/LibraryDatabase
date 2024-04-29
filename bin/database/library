@@ -1,0 +1,90 @@
+CREATE DATABASE library;
+
+USE library;
+
+CREATE TABLE Members (
+    MemberID INT PRIMARY KEY,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    Email VARCHAR(100)
+);
+
+CREATE TABLE Librarian (
+    LibrarianID INT PRIMARY KEY,
+    Email VARCHAR(100),
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50)
+);
+
+CREATE TABLE Books (
+    BookID INT PRIMARY KEY,
+    Genre VARCHAR(50),
+    Title VARCHAR(100),
+    Author VARCHAR(100),
+    ISBN VARCHAR(20),
+    TotalCopies INT,
+    AvailableCopies INT
+);
+
+CREATE TABLE Articles (
+    ArticleID INT PRIMARY KEY,
+    Author VARCHAR(100),
+    Title VARCHAR(100),
+    Volume INT,
+    Issue VARCHAR(20),
+    AvailableCopies INT,
+    TotalCopies INT
+);
+
+CREATE TABLE Movies (
+    MovieID INT PRIMARY KEY,
+    Title VARCHAR(100),
+    Director VARCHAR(100),
+    YearOfRelease INT,
+    AvailableCopies INT,
+    TotalCopies INT
+);
+
+CREATE TABLE Transactions (
+    TransactionID INT PRIMARY KEY,
+    TransactionDate DATE,
+    TransactionType VARCHAR(20),
+    DueDate DATE,
+    MemberID INT,
+    BookID INT,
+    ArticleID INT,
+    MovieID INT,
+    FOREIGN KEY (MemberID) REFERENCES Members(MemberID),
+    FOREIGN KEY (BookID) REFERENCES Books(BookID),
+    FOREIGN KEY (ArticleID) REFERENCES JournalsArticles(ArticleID),
+    FOREIGN KEY (MovieID) REFERENCES Movies(MovieID)
+);
+
+INSERT INTO Members (MemberID, FirstName, LastName, Email)
+VALUES (1, 'John', 'Doe', 'johndoe@example.com'),
+       (2, 'Jane', 'Smith', 'janesmith@example.com'),
+       (3, 'Alice', 'Jones', 'alicejones@example.com');
+
+INSERT INTO Librarian (LibrarianID, Email, FirstName, LastName)
+VALUES (1, 'librarian1@library.com', 'Michael', 'Brown'),
+       (2, 'librarian2@library.com', 'Sarah', 'Lee'),
+       (3, 'librarian3@library.com', 'David', 'Williams');
+
+INSERT INTO Books (BookID, Genre, Title, Author, ISBN, TotalCopies, AvailableCopies)
+VALUES (1, 'Science Fiction', 'The Martian', 'Andy Weir', '978-0316203761', 3, 3),
+       (2, 'Fantasy', 'Lord of the Rings', 'J.R.R. Tolkien', '978-0007526352', 3, 3),
+       (3, 'Mystery', 'And Then There Were None', 'Agatha Christie', '978-0007146679', 3, 3);
+
+INSERT INTO Articles (ArticleID, Author, Title, Volume, Issue, AvailableCopies, TotalCopies)
+VALUES (1, 'Stephen Hawking', 'A Brief History of Time', 1, '1', 3, 3),
+       (2, 'Albert Einstein', 'On the Electrodynamics of Moving Bodies', 17, 'Special Number', 3, 3),
+       (3, 'Marie Curie', 'Radioactivity', 2, '1', 3, 3);
+
+INSERT INTO Movies (MovieID, Title, Director, YearOfRelease, AvailableCopies, TotalCopies)
+VALUES (1, 'The Shawshank Redemption', 'Frank Darabont', 1994, 3, 3),
+       (2, 'The Godfather', 'Francis Ford Coppola', 1972, 3, 3),
+       (3, 'The Dark Knight', 'Christopher Nolan', 2008, 3, 3);
+
+-- Transactions table is left empty as it relies on foreign keys 
+-- from other tables. You can populate it with data after creating 
+-- transactions referencing existing members, books, articles, or movies.

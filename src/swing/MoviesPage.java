@@ -1,4 +1,5 @@
 package swing;
+import library.*;
 
 import javax.swing.*;
 
@@ -8,7 +9,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.util.ArrayList;
 import java.awt.event.*;
 
 public class MoviesPage extends JFrame {
@@ -38,7 +39,8 @@ public class MoviesPage extends JFrame {
             }
         });
 
-        // Swing does not offer their own "placeholder text" feature for the search bars so you have to do this instead where it will simply remove the text if the person decides to
+        // Swing does not offer their own "placeholder text" feature for the search bars
+        // so you have to do this instead where it will simply remove the text if the person decides to
         // type anything in and replaces it with the placeholder text if nothing was typed in.
         searchField.addFocusListener(new FocusListener() {
             @Override
@@ -66,28 +68,39 @@ public class MoviesPage extends JFrame {
         JPanel allMoviesPanel = new JPanel();
         allMoviesPanel.setLayout(new BoxLayout(allMoviesPanel, BoxLayout.Y_AXIS));
 
+        // Placeholder for doing an sql query
+        ArrayList<Movie> movies = new ArrayList<>();
+        for (int i = 0; i < 15; i++) { 
+            Movie movie = new Movie();
+            movie.setTitle("Title: Placeholder Title: " + i);
+            movie.setMovieID(i);
+            movie.setDirector("Director: Placeholder Director");
+            movie.setReleaseYear(i);
+            movie.setAvailableCopies(i);
+            movie.setTotalCopies(i);
+            movies.add(movie);
+        }
+
         // This is how you add a movie into a list like view. This is in a set size for placeholder purposes,
         // but will change when functionality comes in after searching for a specific book
-        for (int i = 0; i < 15; i++) { 
+        for (Movie movie : movies) {
             JPanel moviePanel = new JPanel();
             moviePanel.setLayout(new GridLayout(6, 1));
 
-            JLabel titleLabel = new JLabel("Title: Placeholder Title" + i);
-            JLabel directorLabel = new JLabel("Author: Placeholder Director");
-            JLabel genreLabel = new JLabel("Genre: Placeholder Genre");
-            JLabel yearOfReleaseLabel = new JLabel("Year of Release: Placeholder Year");
-            JLabel totalCopiesLabel = new JLabel("Total Copies: Placeholder");
-            JLabel availableCopiesLabel = new JLabel("Available Copies: Placeholder");
+            JLabel titleLabel = new JLabel(movie.getTitle());
+            JLabel directorLabel = new JLabel(movie.getDirector());
+            JLabel yearOfReleaseLabel = new JLabel("" + movie.getReleaseYear());
+            JLabel availableCopiesLabel = new JLabel("" + movie.getAvailableCopies());
+            JLabel totalCopiesLabel = new JLabel("" + movie.getTotalCopies());
 
             JButton rentButton = new JButton("Rent");
             rentButton.addActionListener(new RentButtonActionListener
             (titleLabel.getText(), directorLabel.getText(), 
-            genreLabel.getText(), yearOfReleaseLabel.getText(), 
+            directorLabel.getText(), yearOfReleaseLabel.getText(), 
             totalCopiesLabel.getText(), availableCopiesLabel.getText()));
 
             moviePanel.add(titleLabel);
             moviePanel.add(directorLabel);
-            moviePanel.add(genreLabel);
             moviePanel.add(yearOfReleaseLabel);
             moviePanel.add(totalCopiesLabel);
             moviePanel.add(availableCopiesLabel);
@@ -118,7 +131,6 @@ public class MoviesPage extends JFrame {
     private class RentButtonActionListener implements ActionListener {
         private String title;
         private String director;
-        private String genre;
         private String yearOfRelease;
         private String totalCopies;
         private String availableCopies;
@@ -126,7 +138,6 @@ public class MoviesPage extends JFrame {
         public RentButtonActionListener(String title, String director, String genre, String yearOfRelease, String totalCopies, String availableCopies) {
             this.title = title;
             this.director = director;
-            this.genre = genre;
             this.yearOfRelease = yearOfRelease;
             this.totalCopies = totalCopies;
             this.availableCopies = availableCopies;

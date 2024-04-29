@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class LoginPage extends JFrame {
-
     public LoginPage() {
         super("Login");
 
@@ -37,7 +36,7 @@ public class LoginPage extends JFrame {
                     JOptionPane.showMessageDialog(LoginPage.this, "Login successful", "Success", JOptionPane.INFORMATION_MESSAGE);
                     dispose();
                     new DashboardPage(); // Opens the librarian page ui
-                }else if (enteredUsername.equals("admin") && enteredPassword.equals("123")) {
+                } else if (enteredUsername.equals("admin") && enteredPassword.equals("123")) {
                     JOptionPane.showMessageDialog(LoginPage.this, "Admin Login successful", "Success", JOptionPane.INFORMATION_MESSAGE);
                     dispose();
                     new LibrarianPage();
@@ -47,7 +46,8 @@ public class LoginPage extends JFrame {
             }
         });
 
-        // Swing does not offer their own "placeholder text" feature for the search bars so you have to do this instead where it will simply remove the text if the person decides to
+        // Swing does not offer their own "placeholder text" feature for the search bars
+        // so you have to do this instead where it will simply remove the text if the person decides to
         // type anything in and replaces it with the placeholder text if nothing was typed in.
         emailField.addFocusListener(new FocusListener() {
             @Override
