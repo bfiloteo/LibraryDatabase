@@ -184,8 +184,14 @@ public class ArticlesPage extends JFrame {
     // Search call for using the search bar in articles page.
     private void CreateSqlQuery(String searchText)
     {
+        String[] searchWords = searchText.split(" ");
+
         String stmtString = "SELECT Author, Title, Volume, Issue, TotalCopies, AvailableCopies FROM Articles " + 
-                            "WHERE Title LIKE \"%" + searchText + "%\" OR Author LIKE \"%" + searchText + "%\";";
+                            "WHERE Title LIKE \"%" + searchWords[0] + "%\" OR Author LIKE \"%" + searchWords[0] + "%\"";
+        for (int i = 1; i < searchWords.length; i++)
+            stmtString += "OR Title LIKE \"%" + searchWords[i] + "%\" OR Author LIKE \"%" + searchWords[i] + "%\"";
+        stmtString += ";";
+        
         try {
             stmt = conn.createStatement();
             rs = stmt.executeQuery(stmtString);
