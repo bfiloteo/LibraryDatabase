@@ -155,13 +155,15 @@ public class ArticlesPage extends JFrame {
         }
     }
 
+    // SQL connection
     private void createSQLConnection()
     {
         try
         {
-            // The newInstance() call is a work around for some
-            // broken Java implementations
-            // default: conn = DriverManager.getConnection("jdbc:mysql://localhost/<database name>?" + "user=<username: may be root>&password=<password>");
+            // The newInstance() call is a work around for some broken Java implementations.
+            // default for running on local:
+            //conn = DriverManager.getConnection("jdbc:mysql://localhost/<database name>?" +
+            //"user=<username: may be root>&password=<password>");
             conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=329761");
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
         }
@@ -178,6 +180,8 @@ public class ArticlesPage extends JFrame {
         }
     }   
 
+    // Search: SQL Query
+    // Search call for using the search bar in articles page.
     private void CreateSqlQuery(String searchText)
     {
         String stmtString = "SELECT Author, Title, Volume, Issue, TotalCopies, AvailableCopies FROM Articles " + 

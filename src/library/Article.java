@@ -1,5 +1,11 @@
 package library;
 
+/*
+ * Article object.
+ * 
+ * Constructor, getters, setters.
+ */
+
 public class Article {
 
     private int articleId;
