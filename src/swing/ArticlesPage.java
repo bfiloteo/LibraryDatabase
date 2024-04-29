@@ -4,10 +4,16 @@ import library.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Random;
 import java.awt.event.*;
 import java.sql.*;
+import java.time.LocalDate;
+
 
 public class ArticlesPage extends JFrame {
+    public static final String searchPrompt = "Enter the article's title or author";
+    public static final String backPrompt = "Back to Main Menu";
+    public static final int WeeksToBorrow = 3;
     private JTextField searchField;
     private JPanel allArticlesPanel = null;
     ArrayList<Article> articles;    
@@ -24,10 +30,10 @@ public class ArticlesPage extends JFrame {
         allArticlesPanel = new JPanel();
         allArticlesPanel.setLayout(new BoxLayout(allArticlesPanel, BoxLayout.Y_AXIS));
 
-        searchField = new JTextField("Enter the articles's title or author...");
+        searchField = new JTextField(searchPrompt);
         searchField.setMinimumSize(new Dimension(200, searchField.getPreferredSize().height));
 
-        JButton backButton = new JButton("Back to Main Menu");
+        JButton backButton = new JButton(backPrompt);
         JButton searchButton = new JButton("Search");
 
         backButton.addActionListener(new ActionListener() {
@@ -42,7 +48,7 @@ public class ArticlesPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Add functionality code here for when the user searches for an article
-                CreateSqlQuery(searchField.getText());
+                createSQLQuery(searchField.getText());
                 updateAllArticlesPanel();
             }
         });
@@ -53,7 +59,7 @@ public class ArticlesPage extends JFrame {
         searchField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (searchField.getText().equals("Enter the article's title, author, or genre...")) {
+                if (searchField.getText().equals(searchPrompt)) {
                     searchField.setText("");
                 }
             }
@@ -61,7 +67,7 @@ public class ArticlesPage extends JFrame {
             @Override
             public void focusLost(FocusEvent e) {
                 if (searchField.getText().isEmpty()) {
-                    searchField.setText("Enter the article's title, author, or genre...");
+                    searchField.setText(searchPrompt);
                 }
             }
         });
@@ -102,11 +108,8 @@ public class ArticlesPage extends JFrame {
             JLabel totalCopiesLabel = new JLabel("" + article.getTotalCopies());
             JLabel availableCopiesLabel = new JLabel("" + article.getAvailableCopies());
 
-            JButton rentButton = new JButton("Rent");
-            rentButton.addActionListener(new RentButtonActionListener
-            (titleLabel.getText(), authorLabel.getText(),
-             volumeLabel.getText(), issueLabel.getText(), 
-             totalCopiesLabel.getText(), availableCopiesLabel.getText()));
+            JButton borrowButton = new JButton("Borrow");
+            borrowButton.addActionListener(new BorrowButtonActionListener(article));
 
             articlePanel.add(titleLabel);
             articlePanel.add(authorLabel);
@@ -114,7 +117,7 @@ public class ArticlesPage extends JFrame {
             articlePanel.add(issueLabel);
             articlePanel.add(totalCopiesLabel);
             articlePanel.add(availableCopiesLabel);
-            articlePanel.add(rentButton);
+            articlePanel.add(borrowButton);
 
             // Creates the black line between each article
             articlePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -127,29 +130,18 @@ public class ArticlesPage extends JFrame {
     }
 
     // This class ensures that each button to the book will be its own button to the corresponding book,
-    // so that when the user decides to rent the book,
-    // the button to rent it will know what book the user chose.
-    private class RentButtonActionListener implements ActionListener {
-        private String title;
-        private String author;
-        private String volume;
-        private String issue;
-        private String totalCopies;
-        private String availableCopies;
+    // so that when the user decides to borrow the book, the button to borrow it will know what book the user chose.
+    private class BorrowButtonActionListener implements ActionListener {
+        private Article article;
 
-        public RentButtonActionListener(String title, String author, String volume, String genre, String totalCopies, String availableCopies) {
-            this.title = title;
-            this.author = author;
-            this.volume = volume;
-            this.issue = genre;
-            this.totalCopies = totalCopies;
-            this.availableCopies = availableCopies;
+        public BorrowButtonActionListener(Article article) {
+            this.article = article;
         }
 
-        // Code to add after the person rents a article.
+        // Code to add after the person borrows an article.
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("Title: " + title);
+            createSQLUpdate(article);
         }
     }
 
@@ -180,15 +172,16 @@ public class ArticlesPage extends JFrame {
 
     // Search: SQL Query
     // Search call for using the search bar in articles page.
-    private void CreateSqlQuery(String searchText)
+    private void createSQLQuery(String searchText)
     {
         String[] searchWords = searchText.split(" ");
 
-        String stmtString = "SELECT Author, Title, Volume, Issue, TotalCopies, AvailableCopies FROM Articles " + 
+        String stmtString = "SELECT ArticleID, Author, Title, Volume, Issue, TotalCopies, AvailableCopies FROM Articles " + 
                             "WHERE Title LIKE \"%" + searchWords[0] + "%\" OR Author LIKE \"%" + searchWords[0] + "%\"";
         for (int i = 1; i < searchWords.length; i++)
             stmtString += "OR Title LIKE \"%" + searchWords[i] + "%\" OR Author LIKE \"%" + searchWords[i] + "%\"";
         stmtString += ";";
+        System.out.println(stmtString);
         
         try {
             stmt = conn.createStatement();
@@ -215,39 +208,104 @@ public class ArticlesPage extends JFrame {
                     System.out.println("");
                     Article article = new Article();
                     // Column indexes must match order of SELECT query, starting from index 1
-                    article.setAuthor(rs.getString(1));
-                    article.setTitle(rs.getString(2));
-                    article.setVolume(rs.getInt(3));
-                    article.setIssue(rs.getString(4));
-                    article.setTotalCopies(rs.getInt(5));
-                    article.setAvailableCopies(rs.getInt(6));
+                    article.setArticleId(rs.getInt(1));
+                    article.setAuthor(rs.getString(2));
+                    article.setTitle(rs.getString(3));
+                    article.setVolume(rs.getInt(4));
+                    article.setIssue(rs.getString(5));
+                    article.setTotalCopies(rs.getInt(6));
+                    article.setAvailableCopies(rs.getInt(7));
                     articles.add(article);
                 }
             }
         }
-        catch (SQLException ex) {
-            // handle any errors
-            System.out.println("SQLException: " + ex.getMessage());
-            System.out.println("SQLState: " + ex.getSQLState());
-            System.out.println("VendorError: " + ex.getErrorCode());
-        }
-        finally {
-            // Release resources in a finally{} block in reverse-order of their creation
+        catch (SQLException ex) { handleSQLException(ex); }
+        finally { releaseSQLResources(); }
+    }
+
+    private void createSQLUpdate(Article article)
+    {
+        // Do SQL query to get number of available copies
+        int availableCopies = 0;
+        String stmtString = "SELECT AvailableCopies FROM Articles WHERE ArticleID = " + article.getArticleId() + ";";
+        System.out.println(stmtString);
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(stmtString);
+        
+            // Now do something with the ResultSet ....
             if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException sqlEx) { } // ignore
-        
-                rs = null;
-            }
-        
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException sqlEx) { } // ignore
-        
-                stmt = null;
+                while (rs.next()) {
+                    availableCopies = rs.getInt(1);
+                    System.out.println("Available Copies =\t" + availableCopies);
+                }
             }
         }
+        catch (SQLException ex) { handleSQLException(ex); }
+        finally { releaseSQLResources(); }
+
+        // if there is an available copy, then update Articles table to reduce available copies by 1
+        // and update Transactions table to borrow the article
+        if( availableCopies > 0)
+        {
+            availableCopies--;
+            stmtString = "UPDATE Articles SET AvailableCopies = " + availableCopies + " WHERE ArticleID = " + article.getArticleId() + ";";
+            System.out.println(stmtString);
+            try {
+                stmt = conn.createStatement();
+                stmt.execute(stmtString);
+            }
+            catch (SQLException ex) { handleSQLException(ex); }
+            finally { releaseSQLResources(); }
+            article.setAvailableCopies(availableCopies); // update article with decremented availableCopies
+            updateAllArticlesPanel();
+
+            LocalDate transactionDate = LocalDate.now();
+            LocalDate dueDate = LocalDate.now();
+            dueDate.plusWeeks(WeeksToBorrow);
+            int memberID = 1; // TODO placeholder
+            Random rand = new Random(); // generate random number for transaction ID
+            int transactionID = transactionDate.hashCode() + article.getArticleId() + (memberID * 1024) + rand.nextInt();
+            if( transactionID < 0 ) transactionID = -transactionID; // make transactionID positive
+            // TODO check for collisions in Transactions table
+            stmtString = "INSERT INTO Transactions (TransactionID, TransactionDate, TransactionType, DueDate, MemberID, ArticleID) VALUES (" +
+                         transactionID + ", \"" + transactionDate + "\", " + "\"BORROW\"" + ", \"" + dueDate + "\", " + memberID + ", " + article.getArticleId() + ");";
+            System.out.println(stmtString);
+            try {
+                stmt = conn.createStatement();
+                stmt.execute(stmtString);
+            }
+            catch (SQLException ex) { handleSQLException(ex); }
+            finally { releaseSQLResources(); }
+        }
+        // TODO else display error message indicating no available copies to borrow
+    }
+
+    private void handleSQLException(SQLException ex)
+    {
+        // handle any errors
+        System.out.println("SQLException: " + ex.getMessage());
+        System.out.println("SQLState: " + ex.getSQLState());
+        System.out.println("VendorError: " + ex.getErrorCode());
+    }
+    private void releaseSQLResources()
+    {
+        // Release resources in a finally{} block in reverse-order of their creation
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException sqlEx) { } // ignore
+    
+            rs = null;
+        }
+    
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException sqlEx) { } // ignore
+    
+            stmt = null;
+        }
+
     }
 }
