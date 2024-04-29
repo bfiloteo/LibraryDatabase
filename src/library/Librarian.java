@@ -4,13 +4,13 @@ public class Librarian {
 
     private String firstName;
     private String lastName;
-    private int librarianId;
+    private int librarianID;
     private String email;
   
     public Librarian() {
         firstName = "";
         lastName = "";
-        librarianId = 0;
+        librarianID = 0;
         email = "";
     }
   
@@ -24,7 +24,7 @@ public class Librarian {
     }
   
     public int getLibrarianID() {
-      return librarianId;
+      return librarianID;
     }
   
     public String getEmail() {
@@ -40,8 +40,8 @@ public class Librarian {
       this.lastName = lastName;
     }
   
-    public void setLibrarianId(int librarianId) {
-      this.librarianId = librarianId;
+    public void setLibrarianID(int librarianID) {
+      this.librarianID = librarianID;
     }
   
     public void setEmail(String email) {

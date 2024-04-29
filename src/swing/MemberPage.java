@@ -14,7 +14,7 @@ public class MemberPage extends JFrame {
     public static final String backPrompt = "Back to Main Menu";
     private JPanel allBorrowedPanel = null;
     Member member;
-    ArrayList<Transaction> transactions; // all borrow transactions
+    ArrayList<Transaction> transactions; // all outstanding borrowed media
     private Connection conn = null;
     private Statement stmt = null;
     private ResultSet rs = null;
@@ -34,6 +34,7 @@ public class MemberPage extends JFrame {
             }
         });
 
+        // Get member from memberID
         member = createMemberSQLQuery(memberID);
         JLabel firstNameLabel = new JLabel(member.getFirstName());
         JLabel lastNameLabel = new JLabel(member.getLastName());
@@ -47,11 +48,10 @@ public class MemberPage extends JFrame {
         accountInfoPanel.add(lastNameLabel);
         accountInfoPanel.add(emailLabel);
         
-        createSQLQuery();
-
         // Borrowed Panel (articles, books, movies)
         allBorrowedPanel = new JPanel();
         allBorrowedPanel.setLayout(new BoxLayout(allBorrowedPanel, BoxLayout.Y_AXIS));
+        createSQLQuery();
         updateAllBorrowedPanel();
 
         // Scrollbar feature
@@ -66,11 +66,12 @@ public class MemberPage extends JFrame {
         setSize(400, 300);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        
     }
 
     private void updateAllBorrowedPanel()
     {
+        allBorrowedPanel.removeAll();
+
         for (Transaction transaction : transactions) { 
             JPanel borrowedPanel = new JPanel();
             borrowedPanel.setLayout(new GridLayout(1, 5));
@@ -109,7 +110,6 @@ public class MemberPage extends JFrame {
             createSQLUpdate(transaction);
         }
     }
-
 
     // SQL connection
     private void createSQLConnection()
@@ -164,9 +164,10 @@ public class MemberPage extends JFrame {
                     member.setFirstName(rs.getString(1));
                     member.setLastName(rs.getString(2));
                     member.setEmail(rs.getString(3));
+                    releaseSQLResources();
                     return member;
                 }
-                // TODO: match each return transaction to the previous borrow transaction
+                System.out.println("Error: did not find memberID = " + memberID + " in Members table");
             }
         }
         catch (SQLException ex) { handleSQLException(ex); }
@@ -178,13 +179,13 @@ public class MemberPage extends JFrame {
     // Find all transactions for given member.
     private void createSQLQuery()
     {
-        String stmtString = "SELECT TransactionID, Title, TransactionType, MediaType, TransactionDate, DueDate " + 
+        String stmtString = "SELECT TransactionID, Title, TransactionType, MediaType, TransactionDate, DueDate, Transactions.ArticleID, Transactions.BookID, Transactions.MovieID " + 
                             "FROM Transactions INNER JOIN Articles ON Transactions.ArticleID = Articles.ArticleID " + 
                             "WHERE MemberID = " + member.getMemberID() + " UNION " +
-                            "SELECT TransactionID, Title, TransactionType, MediaType, TransactionDate, DueDate " + 
+                            "SELECT TransactionID, Title, TransactionType, MediaType, TransactionDate, DueDate, Transactions.ArticleID, Transactions.BookID, Transactions.MovieID " + 
                             "FROM Transactions INNER JOIN Books ON Transactions.BookID = Books.BookID " + 
                             "WHERE MemberID = " + member.getMemberID() + " UNION " +
-                            "SELECT TransactionID, Title, TransactionType, MediaType, TransactionDate, DueDate " + 
+                            "SELECT TransactionID, Title, TransactionType, MediaType, TransactionDate, DueDate, Transactions.ArticleID, Transactions.BookID, Transactions.MovieID " + 
                             "FROM Transactions INNER JOIN Movies ON Transactions.MovieID = Movies.MovieID " + 
                             "WHERE MemberID = " + member.getMemberID() + ";";
         System.out.println(stmtString);
@@ -213,37 +214,95 @@ public class MemberPage extends JFrame {
                     }
                     System.out.println("");
 
-                    Transaction transaction = new Transaction();
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                    // Column indexes must match order of SELECT query, starting from index 1
-                    transaction.setTransactionID(rs.getInt(1));
-                    transaction.setTitle(rs.getString(2));
-                    transaction.setTransactionType(rs.getString(3));
-                    transaction.setMediaType(rs.getString(4));
-                    transaction.setTransactionDate(formatter.parse(rs.getString(5)));
-                    transaction.setDueDate(formatter.parse(rs.getString(6)));
-                    transactions.add(transaction);
+                    // if borrow transaction type
+                    if(rs.getString(3).equals("borrow"))
+                    {
+                        // then add to borrowed list
+                        Transaction transaction = new Transaction();
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                        // Column indexes must match order of SELECT query, starting from index 1
+                        transaction.setTransactionID(rs.getInt(1));
+                        transaction.setTitle(rs.getString(2));
+                        transaction.setTransactionType(rs.getString(3));
+                        transaction.setMediaType(rs.getString(4));
+                        transaction.setTransactionDate(formatter.parse(rs.getString(5)));
+                        transaction.setDueDate(formatter.parse(rs.getString(6)));
+                        if(transaction.getMediaType().equals("article"))
+                            transaction.setArticleID(rs.getInt(7));
+                        else if(transaction.getMediaType().equals("book"))
+                            transaction.setBookID(rs.getInt(8));
+                        else if(transaction.getMediaType().equals("movie"))
+                            transaction.setMovieID(rs.getInt(9));
+                        else
+                            System.out.println("Unknown media type " + transaction.getMediaType());
+                        transaction.setMemberID(member.getMemberID());
+                        transactions.add(transaction);
+                    }
+                    else // must be return
+                    {
+                        // so remove corresponding borrow transaction
+                        String mediaType = rs.getString(4);
+                        removeBorrowedMedia(mediaType, rs.getInt(7), rs.getInt(8), rs.getInt(9));
+                    }
                 }
-                // TODO: match each return transaction to the previous borrow transaction
             }
         }
         catch (SQLException ex) { handleSQLException(ex); }
         catch (Exception ex) { System.out.println(ex.getMessage());}
         finally { releaseSQLResources(); }
     }
+
+    private void removeBorrowedMedia(String mediaType, int articleID, int bookID, int movieID)
+    {
+        if(mediaType.equals("article"))
+        {
+            int i = transactions.size() - 1;
+            while( i>= 0 && transactions.get(i).getArticleID() != articleID)
+                i--;
+            if(i >= 0)
+                transactions.remove(i);
+            else
+                System.out.println("Cannot find matching borrow transaction for articleID = " + articleID);
+        }
+        else if(mediaType.equals("book"))
+        {
+            int i = transactions.size() - 1;
+            while( i>= 0 && transactions.get(i).getBookID() != bookID)
+                i--;
+            if(i >= 0)
+            transactions.remove(i);
+            else
+                System.out.println("Cannot find matching borrow transaction for bookID = " + bookID);
+        }
+        else if(mediaType.equals("movie"))
+        {
+            int i = transactions.size() - 1;
+            while( i>= 0 && transactions.get(i).getMovieID() != movieID)
+                i--;
+            if(i >= 0)
+            transactions.remove(i);
+            else
+                System.out.println("Cannot find matching borrow transaction for movieID = " + movieID);
+        }
+        else
+            System.out.println("Unknown media type " + mediaType);
+
+    }
+
     private void createSQLUpdate(Transaction transaction)
     {
         // Do SQL query to get number of available copies
         int availableCopies = 0;
+        int totalCopies = 0;
         String stmtString = "";
         if(transaction.getMediaType().equals("article")) {
-            stmtString = "SELECT AvailableCopies FROM Articles WHERE MovieID = " + transaction.getArticleID() + ";";
+            stmtString = "SELECT AvailableCopies, TotalCopies FROM Articles WHERE ArticleID = " + transaction.getArticleID() + ";";
         }
         else if(transaction.getMediaType().equals("book")) {
-            stmtString = "SELECT AvailableCopies FROM Books WHERE MovieID = " + transaction.getBookID() + ";";
+            stmtString = "SELECT AvailableCopies, TotalCopies FROM Books WHERE BookID = " + transaction.getBookID() + ";";
         }
         else if(transaction.getMediaType().equals("movie")) {
-            stmtString = "SELECT AvailableCopies FROM Movies WHERE MovieID = " + transaction.getMovieID() + ";";
+            stmtString = "SELECT AvailableCopies, TotalCopies FROM Movies WHERE MovieID = " + transaction.getMovieID() + ";";
         }
         else {
             System.out.println("Unknown media type " + transaction.getMediaType());
@@ -258,35 +317,43 @@ public class MemberPage extends JFrame {
                 while (rs.next()) {
                     availableCopies = rs.getInt(1);
                     System.out.println("Available Copies =\t" + availableCopies);
+                    totalCopies = rs.getInt(2);
+                    System.out.println("Total Copies =\t" + totalCopies);
                 }
             }
         }
         catch (SQLException ex) { handleSQLException(ex); }
         finally { releaseSQLResources(); }
 
-        // update media table to increase available copies by 1
-        // and update Transactions table to return the media
-        availableCopies++;
-        if(transaction.getMediaType().equals("article")) {
-            stmtString = "UPDATE Articles SET AvailableCopies = " + availableCopies + " WHERE ArticleID = " + transaction.getArticleID() + ";";
+        if( availableCopies < totalCopies)
+        {
+            // update media table to increase available copies by 1
+            // and update Transactions table to return the media
+            availableCopies++;
+            if(transaction.getMediaType().equals("article")) {
+                stmtString = "UPDATE Articles SET AvailableCopies = " + availableCopies + " WHERE ArticleID = " + transaction.getArticleID() + ";";
+            }
+            else if(transaction.getMediaType().equals("book")) {
+                stmtString = "UPDATE Books SET AvailableCopies = " + availableCopies + " WHERE BookID = " + transaction.getBookID() + ";";
+            }
+            else if(transaction.getMediaType().equals("movie")) {
+                stmtString = "UPDATE Movies SET AvailableCopies = " + availableCopies + " WHERE MovieID = " + transaction.getMovieID() + ";";
+            }
+            else {
+                System.out.println("Unknown media type " + transaction.getMediaType());
+            }
+            System.out.println(stmtString);
+            try {
+                stmt = conn.createStatement();
+                stmt.execute(stmtString);
+            }
+            catch (SQLException ex) { handleSQLException(ex); }
+            finally { releaseSQLResources(); }
+            removeBorrowedMedia(transaction.getMediaType(), transaction.getArticleID(), transaction.getBookID(), transaction.getMovieID());
+            updateAllBorrowedPanel();
         }
-        else if(transaction.getMediaType().equals("book")) {
-            stmtString = "UPDATE Books SET AvailableCopies = " + availableCopies + " WHERE BookID = " + transaction.getBookID() + ";";
-        }
-        else if(transaction.getMediaType().equals("movie")) {
-            stmtString = "UPDATE Movies SET AvailableCopies = " + availableCopies + " WHERE MovieID = " + transaction.getMovieID() + ";";
-        }
-        else {
-            System.out.println("Unknown media type " + transaction.getMediaType());
-        }
-        System.out.println(stmtString);
-        try {
-            stmt = conn.createStatement();
-            stmt.execute(stmtString);
-        }
-        catch (SQLException ex) { handleSQLException(ex); }
-        finally { releaseSQLResources(); }
-        updateAllBorrowedPanel();
+        else
+            System.out.println("Cannot return media, availableCopies = " + availableCopies + " >= totalCopies = " + totalCopies);
 
         LocalDate transactionDate = LocalDate.now();
         Random rand = new Random(); // generate random number for transaction ID
@@ -315,7 +382,6 @@ public class MemberPage extends JFrame {
         }
         catch (SQLException ex) { handleSQLException(ex); }
         finally { releaseSQLResources(); }
-        // TODO else display error message indicating no available copies to borrow
     }
 
     private void handleSQLException(SQLException ex)
@@ -343,6 +409,5 @@ public class MemberPage extends JFrame {
     
             stmt = null;
         }
-
     }
 }

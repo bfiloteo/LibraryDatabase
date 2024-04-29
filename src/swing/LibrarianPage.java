@@ -2,12 +2,13 @@ package swing;
 import library.*;
 
 import javax.swing.*;
-
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.Random;
+import java.awt.event.*;
+import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 
 public class LibrarianPage extends JFrame {
 
@@ -29,7 +30,7 @@ public class LibrarianPage extends JFrame {
         for (int i = 0; i < 15; i++)
         {
             Librarian librarian = new Librarian();
-            librarian.setLibrarianId(i);
+            librarian.setLibrarianID(i);
             librarian.setFirstName("First Name: " + i);
             librarian.setLastName("Last Name: " + i);
             librarian.setEmail("Email: ");
@@ -62,7 +63,6 @@ public class LibrarianPage extends JFrame {
             });
 
             librarianPanel.add(viewMembersButton);
-        
 
             JButton editLibraryButton = new JButton("Edit Library Page");
 

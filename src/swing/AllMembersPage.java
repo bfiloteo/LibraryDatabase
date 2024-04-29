@@ -1,17 +1,20 @@
 package swing;
+import library.*;
 
 import javax.swing.*;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
+import java.awt.*;
+import java.util.ArrayList;
 import java.awt.event.*;
+import java.sql.*;
+import java.text.SimpleDateFormat;
 
 public class AllMembersPage extends JFrame {
+    public static final String backPrompt = "Back to Main Menu";
+    ArrayList<Transaction> members; // all members
+    private Connection conn = null;
+    private Statement stmt = null;
+    private ResultSet rs = null;
+
     private JTextField searchField;
 
     public AllMembersPage() {
