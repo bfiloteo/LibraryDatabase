@@ -4,13 +4,13 @@ public class Member {
 
     private String firstName;
     private String lastName;
-    private int memberId;
+    private int memberID;
     private String email;
   
     public Member() {
         firstName = "";
         lastName = "";
-        memberId = 0;
+        memberID = 0;
         email = "";
     }
   
@@ -23,8 +23,8 @@ public class Member {
       return lastName;
     }
   
-    public int getMemberId() {
-      return memberId;
+    public int getMemberID() {
+      return memberID;
     }
   
     public String getEmail() {
@@ -40,8 +40,8 @@ public class Member {
       this.lastName = lastName;
     }
   
-    public void setMemberId(int memberId) {
-      this.memberId = memberId;
+    public void setMemberID(int memberID) {
+      this.memberID = memberID;
     }
   
     public void setEmail(String email) {

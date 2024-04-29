@@ -4,10 +4,15 @@ import library.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Random;
 import java.awt.event.*;
+import java.time.LocalDate;
 import java.sql.*;
 
 public class BooksPage extends JFrame {
+    public static final String searchPrompt = "Enter the book's title, author, or genre";
+    public static final String backPrompt = "Back to Main Menu";
+    public static final int WeeksToBorrow = 3;
     private JTextField searchField;
     private JPanel allBooksPanel = null;
     ArrayList<Book> books;
@@ -24,10 +29,10 @@ public class BooksPage extends JFrame {
         allBooksPanel = new JPanel();
         allBooksPanel.setLayout(new BoxLayout(allBooksPanel, BoxLayout.Y_AXIS));
 
-        searchField = new JTextField("Enter the book's title, author, or genre...");
+        searchField = new JTextField(searchPrompt);
         searchField.setMinimumSize(new Dimension(200, searchField.getPreferredSize().height));
 
-        JButton backButton = new JButton("Back to Main Menu");
+        JButton backButton = new JButton(backPrompt);
         JButton searchButton = new JButton("Search");
 
         backButton.addActionListener(new ActionListener() {
@@ -42,7 +47,7 @@ public class BooksPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Add functionality code here for when the user searches for a book
-                CreateSqlQuery(searchField.getText());
+                CreateSQLQuery(searchField.getText());
                 updateAllBooksPanel();
             }
         });
@@ -53,7 +58,7 @@ public class BooksPage extends JFrame {
         searchField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                if (searchField.getText().equals("Enter the books title, author, or genre...")) {
+                if (searchField.getText().equals(searchPrompt)) {
                     searchField.setText("");
                 }
             }
@@ -61,7 +66,7 @@ public class BooksPage extends JFrame {
             @Override
             public void focusLost(FocusEvent e) {
                 if (searchField.getText().isEmpty()) {
-                    searchField.setText("Enter the books title, author, or genre...");
+                    searchField.setText(searchPrompt);
                 }
             }
         });
@@ -90,12 +95,10 @@ public class BooksPage extends JFrame {
     {
         allBooksPanel.removeAll();
 
-        // This is how you add a book into a list like view.
-        // This is in a set size for placeholder purposes,
-        // but will change when functionality comes in after searching for a specific book
+        // Add books into a list like view.
         for (Book book : books) {
             JPanel bookPanel = new JPanel();
-            bookPanel.setLayout(new GridLayout(6, 1));
+            bookPanel.setLayout(new GridLayout(1, 7));
 
             JLabel titleLabel = new JLabel(book.getTitle());
             JLabel authorLabel = new JLabel(book.getAuthor());
@@ -104,9 +107,8 @@ public class BooksPage extends JFrame {
             JLabel availableCopiesLabel = new JLabel("" + book.getAvailableCopies());
             JLabel totalCopiesLabel = new JLabel("" + book.getTotalCopies());
             
-            JButton rentButton = new JButton("Rent");
-            rentButton.addActionListener(new RentButtonActionListener(titleLabel.getText(), authorLabel.getText(), 
-            isbnLabel.getText(), genreLabel.getText(), totalCopiesLabel.getText(), availableCopiesLabel.getText()));
+            JButton borrowButton = new JButton("Borrow");
+            borrowButton.addActionListener(new BorrowButtonActionListener(book));
 
             bookPanel.add(titleLabel);
             bookPanel.add(authorLabel);
@@ -114,7 +116,7 @@ public class BooksPage extends JFrame {
             bookPanel.add(genreLabel);
             bookPanel.add(totalCopiesLabel);
             bookPanel.add(availableCopiesLabel);
-            bookPanel.add(rentButton);
+            bookPanel.add(borrowButton);
 
             // Creates the black like between each book
             bookPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -129,27 +131,17 @@ public class BooksPage extends JFrame {
     // This class ensures that each button to the book will be its own button to the corresponding book,
     // so that when the user decides to rent the book,
     // the button to rent it will know what book the user chose.
-    private class RentButtonActionListener implements ActionListener {
-        private String title;
-        private String author;
-        private String isbn;
-        private String genre;
-        private String totalCopies;
-        private String availableCopies;
+    private class BorrowButtonActionListener implements ActionListener {
+        private Book book;
 
-        public RentButtonActionListener(String title, String author, String isbn, String genre, String totalCopies, String availableCopies) {
-            this.title = title;
-            this.author = author;
-            this.isbn = isbn;
-            this.genre = genre;
-            this.totalCopies = totalCopies;
-            this.availableCopies = availableCopies;
+        public BorrowButtonActionListener(Book book) {
+            this.book = book;
         }
 
-        // Code to add after the person rents a book.
+        // Code to add after the person borrows a book.
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("Title: " + title);
+            createSQLUpdate(book);
         }
     }
 
@@ -164,13 +156,7 @@ public class BooksPage extends JFrame {
             conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=329761");
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
         }
-        catch (SQLException ex)
-        {
-            // handle the error
-            System.out.println("SQLException: " + ex.getMessage());
-            System.out.println("SQLState: " + ex.getSQLState());
-            System.out.println("VendorError: " + ex.getErrorCode());
-        }
+        catch (SQLException ex) { handleSQLException(ex); }
         catch (Exception e)
         {
             System.out.println("Error." + e.getMessage());
@@ -178,16 +164,17 @@ public class BooksPage extends JFrame {
     }   
 
     // Search: SQL Query
-    // Search call for using the search bar in articles page.
-    private void CreateSqlQuery(String searchText)
+    // Search call for using the search bar in books page.
+    private void CreateSQLQuery(String searchText)
     {
         String[] searchWords = searchText.split(" ");
 
-        String stmtString = "SELECT Author, Title, Genre, TotalCopies, AvailableCopies FROM Books " + 
+        String stmtString = "SELECT BookID, Author, Title, Genre, TotalCopies, AvailableCopies FROM Books " + 
                             "WHERE Title LIKE \"%" + searchWords[0] + "%\" OR Author LIKE \"%" + searchWords[0] + "%\" OR Genre LIKE \"%" + searchWords[0] + "%\"";
         for (int i = 1; i < searchWords.length; i++)
             stmtString += "OR Title LIKE \"%" + searchWords[i] + "%\" OR Author LIKE \"%" + searchWords[i] + "%\" OR Genre LIKE \"%" + searchWords[i] + "%\"";
         stmtString += ";";
+        System.out.println(stmtString);
         
         try {
             stmt = conn.createStatement();
@@ -202,8 +189,8 @@ public class BooksPage extends JFrame {
                     String name = md.getColumnLabel(i + 1);
                     System.out.print(name + "\t");
                 }
-
                 System.out.println("");
+
                 books.clear(); // remove previous search results
                 while (rs.next()) {
                     System.out.print("Row\t");
@@ -212,41 +199,104 @@ public class BooksPage extends JFrame {
                         System.out.print(value + "\t");
                     }
                     System.out.println("");
-                    // Placeholder code for SQL query
                     Book book = new Book();
-                    book.setTitle(rs.getString(1));
-                    book.setAuthor(rs.getString(2));
-                    book.setGenre(rs.getString(3));
-                    book.setTotalCopies(rs.getInt(4));
-                    book.setAvailableCopies(rs.getInt(5));
+                    // Column indexes must match order of SELECT query, starting from index 1
+                    book.setBookID(rs.getInt(1));
+                    book.setTitle(rs.getString(2));
+                    book.setAuthor(rs.getString(3));
+                    book.setGenre(rs.getString(4));
+                    book.setTotalCopies(rs.getInt(5));
+                    book.setAvailableCopies(rs.getInt(6));
                     books.add(book);
                 }
             }
         }
-        catch (SQLException ex) {
-            // handle any errors
-            System.out.println("SQLException: " + ex.getMessage());
-            System.out.println("SQLState: " + ex.getSQLState());
-            System.out.println("VendorError: " + ex.getErrorCode());
-        }
-        finally {
-            // Release resources in a finally{} block in reverse-order of their creation
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException sqlEx) { } // ignore
-        
-                rs = null;
-            }
-        
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException sqlEx) { } // ignore
-        
-                stmt = null;
-            }
-        }
-    }
-        
+        catch (SQLException ex) { handleSQLException(ex); }
+        finally { releaseSQLResources(); }
+   }
+   private void createSQLUpdate(Book book)
+   {
+       // Do SQL query to get number of available copies
+       int availableCopies = 0;
+       String stmtString = "SELECT AvailableCopies FROM Books WHERE BookID = " + book.getBookID() + ";";
+       System.out.println(stmtString);
+       try {
+           stmt = conn.createStatement();
+           rs = stmt.executeQuery(stmtString);
+       
+           // Now do something with the ResultSet ....
+           if (rs != null) {
+               while (rs.next()) {
+                   availableCopies = rs.getInt(1);
+                   System.out.println("Available Copies =\t" + availableCopies);
+               }
+           }
+       }
+       catch (SQLException ex) { handleSQLException(ex); }
+       finally { releaseSQLResources(); }
+
+       // if there is an available copy, then update Books table to reduce available copies by 1
+       // and update Transactions table to borrow the book
+       if( availableCopies > 0)
+       {
+           availableCopies--;
+           stmtString = "UPDATE Books SET AvailableCopies = " + availableCopies + " WHERE BookID = " + book.getBookID() + ";";
+           System.out.println(stmtString);
+           try {
+               stmt = conn.createStatement();
+               stmt.execute(stmtString);
+           }
+           catch (SQLException ex) { handleSQLException(ex); }
+           finally { releaseSQLResources(); }
+           book.setAvailableCopies(availableCopies); // update book with decremented availableCopies
+           updateAllBooksPanel();
+
+           LocalDate transactionDate = LocalDate.now();
+           LocalDate dueDate = LocalDate.now();
+           dueDate.plusWeeks(WeeksToBorrow);
+           int memberID = 1; // TODO placeholder
+           Random rand = new Random(); // generate random number for transaction ID
+           int transactionID = transactionDate.hashCode() + book.getBookID() + (memberID * 1024) + rand.nextInt();
+           if( transactionID < 0 ) transactionID = -transactionID; // make transactionID positive
+           // TODO check for collisions in Transactions table
+           stmtString = "INSERT INTO Transactions (TransactionID, TransactionType, MediaType, TransactionDate, DueDate, MemberID, BookID) VALUES (" +
+                        transactionID + ", \"borrow\", \"book\", \"" + transactionDate + "\", \"" + dueDate + "\", " + memberID + ", " + book.getBookID() + ");";
+           System.out.println(stmtString);
+           try {
+               stmt = conn.createStatement();
+               stmt.execute(stmtString);
+           }
+           catch (SQLException ex) { handleSQLException(ex); }
+           finally { releaseSQLResources(); }
+       }
+       // TODO else display error message indicating no available copies to borrow
+   }
+
+   private void handleSQLException(SQLException ex)
+   {
+       // handle any errors
+       System.out.println("SQLException: " + ex.getMessage());
+       System.out.println("SQLState: " + ex.getSQLState());
+       System.out.println("VendorError: " + ex.getErrorCode());
+   }
+   private void releaseSQLResources()
+   {
+       // Release resources in a finally{} block in reverse-order of their creation
+       if (rs != null) {
+           try {
+               rs.close();
+           } catch (SQLException sqlEx) { } // ignore
+   
+           rs = null;
+       }
+   
+       if (stmt != null) {
+           try {
+               stmt.close();
+           } catch (SQLException sqlEx) { } // ignore
+   
+           stmt = null;
+       }
+
+   }
 }

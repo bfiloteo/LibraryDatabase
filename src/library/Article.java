@@ -8,7 +8,7 @@ package library;
 
 public class Article {
 
-    private int articleId;
+    private int articleID;
     private String author;
     private String title;
     private int volume;
@@ -18,7 +18,7 @@ public class Article {
 
     // No-arg constructor (default constructor)
     public Article() {
-        articleId = 0;
+        articleID = 0;
         author = "";
         title = "";
         volume = 0;
@@ -28,8 +28,8 @@ public class Article {
     }
 
     // Getters
-    public int getArticleId() {
-        return articleId;
+    public int getArticleID() {
+        return articleID;
     }
 
     public String getAuthor() {
@@ -57,8 +57,8 @@ public class Article {
     }
 
     // Setters
-    public void setArticleId(int articleId) {
-        this.articleId = articleId;
+    public void setArticleID(int articleID) {
+        this.articleID = articleID;
     }
 
     public void setAuthor(String author) {

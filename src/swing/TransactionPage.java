@@ -42,10 +42,10 @@ public class TransactionPage extends JFrame {
             Transaction transaction = new Transaction();
             transaction.setTransactionType("" + i);
             transaction.setTransactionDate(null);
-            transaction.setBookId(i);
-            transaction.setMovieId(i);
-            transaction.setArticleId(i);
-            transaction.setMemberId(i);
+            transaction.setBookID(i);
+            transaction.setMovieID(i);
+            transaction.setArticleID(i);
+            transaction.setMemberID(i);
 
             transactions.add(transaction);
         }
@@ -57,7 +57,7 @@ public class TransactionPage extends JFrame {
             JPanel transactionPanel = new JPanel();
             transactionPanel.setLayout(new GridLayout(6, 1));
 
-            JLabel isbnLabel = new JLabel("" + transaction.getBookId());
+            JLabel isbnLabel = new JLabel("" + transaction.getBookID());
             JLabel rentedDate = new JLabel("Date of Rent: Placeholder Date");
             JLabel returnDate = new JLabel("Date of Return: Placeholder Date");
             JLabel returnLabel = new JLabel("Return Status");

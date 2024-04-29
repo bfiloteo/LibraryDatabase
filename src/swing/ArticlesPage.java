@@ -88,6 +88,7 @@ public class ArticlesPage extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
 
         setSize(1200, 1000);
+        setResizable(true);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
@@ -99,7 +100,7 @@ public class ArticlesPage extends JFrame {
         // Add articles into a list like view.
         for (Article article : articles) { 
             JPanel articlePanel = new JPanel();
-            articlePanel.setLayout(new GridLayout(6, 1));
+            articlePanel.setLayout(new GridLayout(1, 7));
 
             JLabel titleLabel = new JLabel(article.getTitle());
             JLabel authorLabel = new JLabel(article.getAuthor());
@@ -157,13 +158,7 @@ public class ArticlesPage extends JFrame {
             conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=329761");
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
         }
-        catch (SQLException ex)
-        {
-            // handle the error
-            System.out.println("SQLException: " + ex.getMessage());
-            System.out.println("SQLState: " + ex.getSQLState());
-            System.out.println("VendorError: " + ex.getErrorCode());
-        }
+        catch (SQLException ex) { handleSQLException(ex); }
         catch (Exception e)
         {
             System.out.println("Error." + e.getMessage());
@@ -196,8 +191,8 @@ public class ArticlesPage extends JFrame {
                     String name = md.getColumnLabel(i + 1);
                     System.out.print(name + "\t");
                 }
-
                 System.out.println("");
+
                 articles.clear(); // remove previous search results
                 while (rs.next()) {
                     System.out.print("Row\t");
@@ -208,7 +203,7 @@ public class ArticlesPage extends JFrame {
                     System.out.println("");
                     Article article = new Article();
                     // Column indexes must match order of SELECT query, starting from index 1
-                    article.setArticleId(rs.getInt(1));
+                    article.setArticleID(rs.getInt(1));
                     article.setAuthor(rs.getString(2));
                     article.setTitle(rs.getString(3));
                     article.setVolume(rs.getInt(4));
@@ -227,7 +222,7 @@ public class ArticlesPage extends JFrame {
     {
         // Do SQL query to get number of available copies
         int availableCopies = 0;
-        String stmtString = "SELECT AvailableCopies FROM Articles WHERE ArticleID = " + article.getArticleId() + ";";
+        String stmtString = "SELECT AvailableCopies FROM Articles WHERE ArticleID = " + article.getArticleID() + ";";
         System.out.println(stmtString);
         try {
             stmt = conn.createStatement();
@@ -249,7 +244,7 @@ public class ArticlesPage extends JFrame {
         if( availableCopies > 0)
         {
             availableCopies--;
-            stmtString = "UPDATE Articles SET AvailableCopies = " + availableCopies + " WHERE ArticleID = " + article.getArticleId() + ";";
+            stmtString = "UPDATE Articles SET AvailableCopies = " + availableCopies + " WHERE ArticleID = " + article.getArticleID() + ";";
             System.out.println(stmtString);
             try {
                 stmt = conn.createStatement();
@@ -265,11 +260,11 @@ public class ArticlesPage extends JFrame {
             dueDate.plusWeeks(WeeksToBorrow);
             int memberID = 1; // TODO placeholder
             Random rand = new Random(); // generate random number for transaction ID
-            int transactionID = transactionDate.hashCode() + article.getArticleId() + (memberID * 1024) + rand.nextInt();
+            int transactionID = transactionDate.hashCode() + article.getArticleID() + (memberID * 1024) + rand.nextInt();
             if( transactionID < 0 ) transactionID = -transactionID; // make transactionID positive
             // TODO check for collisions in Transactions table
-            stmtString = "INSERT INTO Transactions (TransactionID, TransactionDate, TransactionType, DueDate, MemberID, ArticleID) VALUES (" +
-                         transactionID + ", \"" + transactionDate + "\", " + "\"BORROW\"" + ", \"" + dueDate + "\", " + memberID + ", " + article.getArticleId() + ");";
+            stmtString = "INSERT INTO Transactions (TransactionID, TransactionType, MediaType, TransactionDate, DueDate, MemberID, ArticleID) VALUES (" +
+                         transactionID + ", \"borrow\", \"article\", \"" + transactionDate + "\", \"" + dueDate + "\", " + memberID + ", " + article.getArticleID() + ");";
             System.out.println(stmtString);
             try {
                 stmt = conn.createStatement();

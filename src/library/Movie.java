@@ -18,11 +18,6 @@ public class Movie {
         totalCopies = 0;
     }
 
-    public void setMovieID(int movieID)
-    {
-        this.movieID = movieID;
-    }
-
     public int getMovieID()
     {
         return movieID;
@@ -49,6 +44,11 @@ public class Movie {
     }
 
     // Setters
+    public void setMovieID(int movieID)
+    {
+        this.movieID = movieID;
+    }
+
     public void setTitle(String newTitle) {
         title = newTitle;
     }

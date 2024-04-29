@@ -4,31 +4,33 @@ import java.util.Date;
 
 public class Transaction {
 
-    private int transactionId;
+    private int transactionID;
     private String title;
+    private String transactionType; // "borrow", "return"
+    private String mediaType; // "article", "book", "movie"
     private Date transactionDate;
-    private String transactionType; // "buy", "rent", or "book"
     private Date dueDate;
-    private int memberId;
-    private int bookId;
-    private int articleId;
-    private int movieId;
+    private int memberID;
+    private int bookID;
+    private int articleID;
+    private int movieID;
 
     public Transaction() {
-        transactionId = 0;
+        transactionID = 0;
         title = "";
-        transactionDate = new Date();
         transactionType = "";
+        mediaType = "";
+        transactionDate = new Date();
         dueDate = new Date();
-        memberId = 0;
-        bookId = 0;
-        articleId = 0;
-        movieId = 0;
+        memberID = 0;
+        bookID = 0;
+        articleID = 0;
+        movieID = 0;
     }
 
     // Getters
-    public int getTransactionId() {
-        return transactionId;
+    public int getTransactionID() {
+        return transactionID;
     }
 
     public String getTitle()
@@ -36,35 +38,66 @@ public class Transaction {
         return title;
     }
 
-    public Date getTransactionDate() {
-        return transactionDate;
-    }
-
     public String getTransactionType() {
         return transactionType;
+    }
+
+    public String getMediaType() {
+        return mediaType;
+    }
+
+    public Date getTransactionDate() {
+        return transactionDate;
     }
 
     public Date getDueDate() {
         return dueDate;
     }
 
-    public int getMemberId() {
-        return memberId;
+    public int getMemberID() {
+        return memberID;
     }
 
-    public Integer getBookId() {
-        return bookId;
+    public Integer getBookID() {
+        return bookID;
     }
 
-    public Integer getArticleId() {
-        return articleId;
+    public Integer getArticleID() {
+        return articleID;
     }
 
-    public Integer getMovieId() {
-        return movieId;
+    public Integer getMovieID() {
+        return movieID;
     }
 
     // Setters with basic validation (optional)
+    public void setTransactionID(int transactionID) {
+        this.transactionID = transactionID;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setTransactionType(String transactionType) {
+        if (transactionType == null || 
+                !transactionType.equalsIgnoreCase("return") &&
+                !transactionType.equalsIgnoreCase("borrow")) {
+            throw new IllegalArgumentException("Invalid transaction type: " + transactionType);
+        }
+        this.transactionType = transactionType;
+    }
+
+    public void setMediaType(String mediaType) {
+        if (mediaType == null || 
+                !mediaType.equalsIgnoreCase("article") &&
+                !mediaType.equalsIgnoreCase("book") &&
+                !mediaType.equalsIgnoreCase("movie")) {
+            throw new IllegalArgumentException("Invalid media type: " + mediaType);
+        }
+        this.mediaType = mediaType;
+    }
+
     public void setTransactionDate(Date transactionDate) {
         if (transactionDate == null) {
             throw new IllegalArgumentException("Transaction date cannot be null");
@@ -72,46 +105,39 @@ public class Transaction {
         this.transactionDate = transactionDate;
     }
 
-    public void setTransactionType(String transactionType) {
-        if (transactionType == null || !transactionType.equalsIgnoreCase("buy") &&
-                !transactionType.equalsIgnoreCase("rent") &&
-                !transactionType.equalsIgnoreCase("book")) {
-            throw new IllegalArgumentException("Invalid transaction type: " + transactionType);
+    public void setDueDate(Date dueDate) {
+        if (dueDate == null) {
+            throw new IllegalArgumentException("Due date cannot be null");
         }
-        this.transactionType = transactionType;
+        this.dueDate = dueDate;
     }
 
-    public void setTitle(String title)
-    {
-        this.title = title;
-    }
-
-    public void setMemberId(int memberId) {
+    public void setMemberID(int memberID) {
         // You might want to validate member ID against a database or other logic
-        this.memberId = memberId;
+        this.memberID = memberID;
     }
 
-    public void setBookId(Integer bookId) {
+    public void setBookID(Integer bookID) {
         // Check if transaction type is "book" before setting
-        if (transactionType == null || !transactionType.equalsIgnoreCase("book")) {
+        if (transactionType == null || !mediaType.equalsIgnoreCase("book")) {
             throw new IllegalArgumentException("Book ID can only be set for book transactions");
         }
-        this.bookId = bookId;
+        this.bookID = bookID;
     }
 
-    public void setArticleId(Integer articleId) {
+    public void setArticleID(Integer articleID) {
         // Check if transaction type is "article" before setting
-        if (transactionType == null || !transactionType.equalsIgnoreCase("article")) {
+        if (transactionType == null || !mediaType.equalsIgnoreCase("article")) {
             throw new IllegalArgumentException("Article ID can only be set for article transactions");
         }
-        this.articleId = articleId;
+        this.articleID = articleID;
     }
 
-    public void setMovieId(Integer movieId) {
+    public void setMovieID(Integer movieID) {
         // Check if transaction type is "movie" before setting
-        if (transactionType == null || !transactionType.equalsIgnoreCase("movie")) {
+        if (transactionType == null || !mediaType.equalsIgnoreCase("movie")) {
             throw new IllegalArgumentException("Movie ID can only be set for movie transactions");
         }
-        this.movieId = movieId;
+        this.movieID = movieID;
     }
 }
