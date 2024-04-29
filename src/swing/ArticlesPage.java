@@ -23,6 +23,10 @@ public class ArticlesPage extends JFrame {
         createSQLConnection();
         articles = new ArrayList<>();
 
+        // Articles Panel
+        allArticlesPanel = new JPanel();
+        allArticlesPanel.setLayout(new BoxLayout(allArticlesPanel, BoxLayout.Y_AXIS));
+
         searchField = new JTextField("Enter the articles's title or author...");
         searchField.setMinimumSize(new Dimension(200, searchField.getPreferredSize().height));
 
@@ -42,7 +46,7 @@ public class ArticlesPage extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 // Add functionality code here for when the user searches for an article
                 CreateSqlQuery(searchField.getText());
-                AddAllArticlesPanel();
+                updateAllArticlesPanel();
             }
         });
 
@@ -75,19 +79,19 @@ public class ArticlesPage extends JFrame {
 
         add(searchPanel, BorderLayout.NORTH);
 
-        setSize(400, 400);
+        // Scrollbar feature
+        JScrollPane scrollPane = new JScrollPane(allArticlesPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        add(scrollPane, BorderLayout.CENTER);
+
+        setSize(1000, 1000);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
-    private void AddAllArticlesPanel()
+    private void updateAllArticlesPanel()
     {
-        // Articles Panel
-        if(allArticlesPanel != null)
-            remove(allArticlesPanel);
-        allArticlesPanel = new JPanel();
-        allArticlesPanel.setLayout(new BoxLayout(allArticlesPanel, BoxLayout.Y_AXIS));
-
+        allArticlesPanel.removeAll();
         // Add articles into a list like view.
         for (Article article : articles) { 
             JPanel articlePanel = new JPanel();
@@ -120,10 +124,6 @@ public class ArticlesPage extends JFrame {
             allArticlesPanel.add(articlePanel);
         }
 
-        // Scrollbar feature
-        JScrollPane scrollPane = new JScrollPane(allArticlesPanel);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        add(scrollPane, BorderLayout.CENTER);
         revalidate();
         repaint();
     }
