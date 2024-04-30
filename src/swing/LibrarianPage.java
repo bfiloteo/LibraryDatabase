@@ -80,7 +80,7 @@ public class LibrarianPage extends JFrame {
             add(librarianPanel, BorderLayout.NORTH);
         }
         
-        setSize(400, 300);
+        setSize(750, 500);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }

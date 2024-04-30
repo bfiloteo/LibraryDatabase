@@ -63,7 +63,8 @@ public class MemberPage extends JFrame {
         add(accountInfoPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER); 
 
-        setSize(400, 300);
+        setSize(750, 500);
+        setResizable(true);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }

@@ -68,7 +68,8 @@ public class DashboardPage {
 
         // Will change later
         dashBoardFrame.setLayout(new BoxLayout(dashBoardFrame.getContentPane(), BoxLayout.Y_AXIS));
-        dashBoardFrame.setSize(300, 300);
+        dashBoardFrame.setSize(750, 500);
+        dashBoardFrame.setResizable(true);
         dashBoardFrame.setVisible(true);
         dashBoardFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }

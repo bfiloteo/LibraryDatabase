@@ -86,7 +86,8 @@ public class BooksPage extends JFrame {
         add(searchPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
 
-        setSize(400, 400);
+        setSize(750, 500);
+        setResizable(true);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }

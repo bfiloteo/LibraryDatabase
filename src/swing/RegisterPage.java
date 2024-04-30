@@ -60,7 +60,8 @@ public class RegisterPage extends JFrame {
         setLayout(new BorderLayout());
         add(registerPanel, BorderLayout.CENTER);
 
-        setSize(300, 150);
+        setSize(750, 500);
+        setResizable(true);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }

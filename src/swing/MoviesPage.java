@@ -86,7 +86,7 @@ public class MoviesPage extends JFrame {
         add(searchPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
 
-        setSize(1200, 1000);
+        setSize(750, 500);
         setResizable(true);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
