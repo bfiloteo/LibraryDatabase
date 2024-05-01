@@ -89,6 +89,7 @@ public class ArticlesPage extends JFrame {
 
         setSize(750, 500);
         setResizable(true);
+        setLocationRelativeTo(null); // center ui on screen
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }

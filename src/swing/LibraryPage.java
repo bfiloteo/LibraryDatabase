@@ -6,9 +6,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import java.awt.event.*;
 
 public class LibraryPage extends JFrame {
@@ -122,7 +119,7 @@ public class LibraryPage extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
         add(addHoldingButton, BorderLayout.SOUTH);
     
-
+        setLocationRelativeTo(null); // center ui on screen
         setSize(400, 400);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

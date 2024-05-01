@@ -81,6 +81,7 @@ public class LibrarianPage extends JFrame {
         }
         
         setSize(750, 500);
+        setLocationRelativeTo(null); // center ui on screen
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
