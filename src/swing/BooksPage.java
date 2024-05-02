@@ -271,7 +271,8 @@ public class BooksPage extends JFrame {
            catch (SQLException ex) { handleSQLException(ex); }
            finally { releaseSQLResources(); }
        }
-       // TODO else display error message indicating no available copies to borrow
+       else
+           System.out.println("Cannot borrow " + book.getTitle() + " since available copies = " + book.getAvailableCopies());
    }
 
    private void handleSQLException(SQLException ex)
