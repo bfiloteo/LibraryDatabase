@@ -1,26 +1,15 @@
 package library;
 
-public class Movie {
-    private int movieID;
+public class Movie extends Item {
     private String title;
     private String director;
     private int releaseYear;
-    private int availableCopies;
-    private int totalCopies;
 
     public Movie()
     {
-        movieID = 0;
         title = "";
         director = "";
         releaseYear = 0;
-        availableCopies = 0;
-        totalCopies = 0;
-    }
-
-    public int getMovieID()
-    {
-        return movieID;
     }
 
     public String getTitle() {
@@ -35,20 +24,7 @@ public class Movie {
         return releaseYear;
     }
 
-    public int getAvailableCopies() {
-        return availableCopies;
-    }
-
-    public int getTotalCopies() {
-        return totalCopies;
-    }
-
     // Setters
-    public void setMovieID(int movieID)
-    {
-        this.movieID = movieID;
-    }
-
     public void setTitle(String newTitle) {
         title = newTitle;
     }
@@ -60,13 +36,4 @@ public class Movie {
     public void setReleaseYear(int newReleaseYear) {
         releaseYear = newReleaseYear;
     }
-
-    public void setAvailableCopies(int newAvailableCopies) {
-        availableCopies = newAvailableCopies;
-    }
-
-    public void setTotalCopies(int newTotalCopies) {
-        totalCopies = newTotalCopies;
-    }
-
 }

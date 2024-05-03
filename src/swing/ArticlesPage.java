@@ -9,26 +9,30 @@ import java.awt.event.*;
 import java.sql.*;
 import java.time.LocalDate;
 
-
 public class ArticlesPage extends JFrame {
+    public static final String SQLTableName = "Articles";
+    public static final String SQLItemIDName = "ArticleID";
+    public static final String mediaType = "article";
     public static final String searchPrompt = "Enter the article's title or author";
     public static final String backPrompt = "Back to Main Menu";
     public static final int WeeksToBorrow = 3;
+    private int memberID = 0;
     private JTextField searchField;
-    private JPanel allArticlesPanel = null;
-    ArrayList<Article> articles;    
+    private JPanel allItemsPanel = null;
+    ArrayList<Article> items;    
     private Connection conn = null;
     private Statement stmt = null;
     private ResultSet rs = null;
 
-    public ArticlesPage() {
-        super("Articles");
+    public ArticlesPage(int memberID) {
+        super(SQLTableName);
+        this.memberID = memberID;
         createSQLConnection();
-        articles = new ArrayList<>();
 
-        // Articles Panel
-        allArticlesPanel = new JPanel();
-        allArticlesPanel.setLayout(new BoxLayout(allArticlesPanel, BoxLayout.Y_AXIS));
+        // Items Panel
+        items = new ArrayList<>();
+        allItemsPanel = new JPanel();
+        allItemsPanel.setLayout(new BoxLayout(allItemsPanel, BoxLayout.Y_AXIS));
 
         searchField = new JTextField(searchPrompt);
         searchField.setMinimumSize(new Dimension(200, searchField.getPreferredSize().height));
@@ -40,16 +44,16 @@ public class ArticlesPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose(); 
-                new DashboardPage(); 
+                new DashboardPage(memberID); 
             }
         });
         
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Add functionality code here for when the user searches for an article
+                // Add functionality code here for when the user searches for an item
                 createSQLQuery(searchField.getText());
-                updateAllArticlesPanel();
+                updateAllItemsPanel();
             }
         });
 
@@ -79,7 +83,7 @@ public class ArticlesPage extends JFrame {
         searchPanel.add(searchButton, BorderLayout.EAST);
         
         // Scrollbar feature
-        JScrollPane scrollPane = new JScrollPane(allArticlesPanel);
+        JScrollPane scrollPane = new JScrollPane(allItemsPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         setLayout(new BorderLayout());
@@ -94,56 +98,75 @@ public class ArticlesPage extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
-    private void updateAllArticlesPanel()
+    private void updateAllItemsPanel()
     {
-        allArticlesPanel.removeAll();
+        String[] header = {"Title", "Author", "Volume", "Issue", "Copies Available", ""};
+        allItemsPanel.removeAll();
+        allItemsPanel.add(makePanel(header));
 
-        // Add articles into a list like view.
-        for (Article article : articles) { 
-            JPanel articlePanel = new JPanel();
-            articlePanel.setLayout(new GridLayout(1, 7));
-
-            JLabel titleLabel = new JLabel(article.getTitle());
-            JLabel authorLabel = new JLabel(article.getAuthor());
-            JLabel volumeLabel = new JLabel("" + article.getVolume());
-            JLabel issueLabel = new JLabel(article.getIssue());
-            JLabel totalCopiesLabel = new JLabel("" + article.getTotalCopies());
-            JLabel availableCopiesLabel = new JLabel("" + article.getAvailableCopies());
-
-            JButton borrowButton = new JButton("Borrow");
-            borrowButton.addActionListener(new BorrowButtonActionListener(article));
-
-            articlePanel.add(titleLabel);
-            articlePanel.add(authorLabel);
-            articlePanel.add(volumeLabel);
-            articlePanel.add(issueLabel);
-            articlePanel.add(totalCopiesLabel);
-            articlePanel.add(availableCopiesLabel);
-            articlePanel.add(borrowButton);
-
-            // Creates the black line between each article
-            articlePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
-            allArticlesPanel.add(articlePanel);
+        // Add items into a list like view.
+        for (Article item : items) { 
+            String[] labels = {item.getTitle(), 
+                               item.getAuthor(), 
+                               "" + item.getVolume(), 
+                               item.getIssue(), 
+                               item.getAvailableCopies() + " of " + item.getTotalCopies(), 
+                               item.getAvailableCopies() > 0 ? "Borrow" : "Unavailable"};
+            if( item.getAvailableCopies() > 0)
+                allItemsPanel.add(makePanelWithButton(labels, item));
+            else
+                // TODO: turn into Hold button
+                allItemsPanel.add(makePanel(labels));
         }
 
         revalidate();
         repaint();
     }
 
-    // This class ensures that each button to the book will be its own button to the corresponding book,
-    // so that when the user decides to borrow the book, the button to borrow it will know what book the user chose.
-    private class BorrowButtonActionListener implements ActionListener {
-        private Article article;
+    private JPanel makePanel(String[] labels)
+    {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(1, labels.length));
+        for(int i = 0; i < labels.length; i++)
+        {
+            JLabel label = new JLabel(labels[i]);
+            panel.add(label);
+        }
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        return panel;
+    }
 
-        public BorrowButtonActionListener(Article article) {
-            this.article = article;
+    private JPanel makePanelWithButton(String[] labels, Article item)
+    {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(1, labels.length));
+        for(int i = 0; i < labels.length - 1; i++)
+        {
+            JLabel label = new JLabel(labels[i]);
+            panel.add(label);
+        }
+        // Last grid is button
+        JButton button = new JButton(labels[labels.length - 1]);
+        button.addActionListener(new BorrowButtonActionListener(item));
+        panel.add(button);
+
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        return panel;
+    }
+
+    // This class ensures that each button to the item will be its own button to the corresponding item,
+    // so that when the user decides to borrow the item, the button to borrow it will know what item the user chose.
+    private class BorrowButtonActionListener implements ActionListener {
+        private Article item;
+
+        public BorrowButtonActionListener(Article item) {
+            this.item = item;
         }
 
-        // Code to add after the person borrows an article.
+        // Code to add after the person borrows an item.
         @Override
         public void actionPerformed(ActionEvent e) {
-            createSQLUpdate(article);
+            createSQLUpdate(item);
         }
     }
 
@@ -167,15 +190,15 @@ public class ArticlesPage extends JFrame {
     }   
 
     // Search: SQL Query
-    // Search call for using the search bar in articles page.
+    // Search call for using the search bar in items page.
     private void createSQLQuery(String searchText)
     {
         String[] searchWords = searchText.split(" ");
 
-        String stmtString = "SELECT ArticleID, Author, Title, Volume, Issue, TotalCopies, AvailableCopies FROM Articles " + 
-                            "WHERE Title LIKE \"%" + searchWords[0] + "%\" OR Author LIKE \"%" + searchWords[0] + "%\"";
+        String stmtString = "SELECT " + SQLItemIDName + ", Title, Author, Volume, Issue, TotalCopies, AvailableCopies FROM " + SQLTableName + 
+                            " WHERE Title LIKE \"%" + searchWords[0] + "%\" OR Author LIKE \"%" + searchWords[0] + "%\"";
         for (int i = 1; i < searchWords.length; i++)
-            stmtString += "OR Title LIKE \"%" + searchWords[i] + "%\" OR Author LIKE \"%" + searchWords[i] + "%\"";
+            stmtString += " OR Title LIKE \"%" + searchWords[i] + "%\" OR Author LIKE \"%" + searchWords[i] + "%\"";
         stmtString += ";";
         System.out.println(stmtString);
         
@@ -194,7 +217,7 @@ public class ArticlesPage extends JFrame {
                 }
                 System.out.println("");
 
-                articles.clear(); // remove previous search results
+                items.clear(); // remove previous search results
                 while (rs.next()) {
                     System.out.print("Row\t");
                     for (int i = 0; i < cols; i++) {
@@ -202,16 +225,17 @@ public class ArticlesPage extends JFrame {
                         System.out.print(value + "\t");
                     }
                     System.out.println("");
-                    Article article = new Article();
+                    Article item = new Article();
                     // Column indexes must match order of SELECT query, starting from index 1
-                    article.setArticleID(rs.getInt(1));
-                    article.setAuthor(rs.getString(2));
-                    article.setTitle(rs.getString(3));
-                    article.setVolume(rs.getInt(4));
-                    article.setIssue(rs.getString(5));
-                    article.setTotalCopies(rs.getInt(6));
-                    article.setAvailableCopies(rs.getInt(7));
-                    articles.add(article);
+                    int index = 1;
+                    item.setItemID(rs.getInt(index++));
+                    item.setTitle(rs.getString(index++));
+                    item.setAuthor(rs.getString(index++));
+                    item.setVolume(rs.getInt(index++));
+                    item.setIssue(rs.getString(index++));
+                    item.setTotalCopies(rs.getInt(index++));
+                    item.setAvailableCopies(rs.getInt(index++));
+                    items.add(item);
                 }
             }
         }
@@ -219,11 +243,11 @@ public class ArticlesPage extends JFrame {
         finally { releaseSQLResources(); }
     }
 
-    private void createSQLUpdate(Article article)
+    private void createSQLUpdate(Item item)
     {
         // Do SQL query to get number of available copies
         int availableCopies = 0;
-        String stmtString = "SELECT AvailableCopies FROM Articles WHERE ArticleID = " + article.getArticleID() + ";";
+        String stmtString = "SELECT AvailableCopies FROM " + SQLTableName + " WHERE " + SQLItemIDName + " = " + item.getItemID() + ";";
         System.out.println(stmtString);
         try {
             stmt = conn.createStatement();
@@ -240,12 +264,12 @@ public class ArticlesPage extends JFrame {
         catch (SQLException ex) { handleSQLException(ex); }
         finally { releaseSQLResources(); }
 
-        // if there is an available copy, then update Articles table to reduce available copies by 1
-        // and update Transactions table to borrow the article
+        // if there is an available copy, then update the SQL table to reduce available copies by 1
+        // and update Transactions table to borrow the item
         if( availableCopies > 0)
         {
             availableCopies--;
-            stmtString = "UPDATE Articles SET AvailableCopies = " + availableCopies + " WHERE ArticleID = " + article.getArticleID() + ";";
+            stmtString = "UPDATE " + SQLTableName + " SET AvailableCopies = " + availableCopies + " WHERE " + SQLItemIDName + " = " + item.getItemID() + ";";
             System.out.println(stmtString);
             try {
                 stmt = conn.createStatement();
@@ -253,19 +277,18 @@ public class ArticlesPage extends JFrame {
             }
             catch (SQLException ex) { handleSQLException(ex); }
             finally { releaseSQLResources(); }
-            article.setAvailableCopies(availableCopies); // update article with decremented availableCopies
-            updateAllArticlesPanel();
+            item.setAvailableCopies(availableCopies); // update item with decremented availableCopies
+            updateAllItemsPanel();
 
             LocalDate transactionDate = LocalDate.now();
             LocalDate dueDate = LocalDate.now();
             dueDate.plusWeeks(WeeksToBorrow);
-            int memberID = 1; // TODO placeholder
             Random rand = new Random(); // generate random number for transaction ID
-            int transactionID = transactionDate.hashCode() + article.getArticleID() + (memberID * 1024) + rand.nextInt();
+            int transactionID = transactionDate.hashCode() + item.getItemID() + (memberID * 1024) + rand.nextInt();
             if( transactionID < 0 ) transactionID = -transactionID; // make transactionID positive
             // TODO check for collisions in Transactions table
-            stmtString = "INSERT INTO Transactions (TransactionID, TransactionType, MediaType, TransactionDate, DueDate, MemberID, ArticleID) VALUES (" +
-                         transactionID + ", \"borrow\", \"article\", \"" + transactionDate + "\", \"" + dueDate + "\", " + memberID + ", " + article.getArticleID() + ");";
+            stmtString = "INSERT INTO Transactions (TransactionID, TransactionType, MediaType, TransactionDate, DueDate, MemberID, " + SQLItemIDName + ") VALUES (" +
+                         transactionID + ", \"borrow\", \"" + mediaType + "\", \"" + transactionDate + "\", \"" + dueDate + "\", " + memberID + ", " + item.getItemID() + ");";
             System.out.println(stmtString);
             try {
                 stmt = conn.createStatement();
@@ -274,7 +297,8 @@ public class ArticlesPage extends JFrame {
             catch (SQLException ex) { handleSQLException(ex); }
             finally { releaseSQLResources(); }
         }
-        // TODO else display error message indicating no available copies to borrow
+        else
+            System.out.println("Cannot borrow item " + item.getItemID() + " since available copies = " + item.getAvailableCopies());
     }
 
     private void handleSQLException(SQLException ex)
@@ -302,6 +326,5 @@ public class ArticlesPage extends JFrame {
     
             stmt = null;
         }
-
     }
 }

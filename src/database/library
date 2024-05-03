@@ -11,14 +11,18 @@ CREATE TABLE Members (
     MemberID INT PRIMARY KEY,
     FirstName VARCHAR(50),
     LastName VARCHAR(50),
-    Email VARCHAR(100)
+    Email VARCHAR(100),
+    UserName VARCHAR(100),
+    PasswordHash INT
 );
 
-CREATE TABLE Librarian (
+CREATE TABLE Librarians (
     LibrarianID INT PRIMARY KEY,
     Email VARCHAR(100),
     FirstName VARCHAR(50),
-    LastName VARCHAR(50)
+    LastName VARCHAR(50),
+    UserName VARCHAR(100),
+    PasswordHash INT
 );
 
 CREATE TABLE Books (
@@ -66,15 +70,15 @@ CREATE TABLE Transactions (
     FOREIGN KEY (MovieID) REFERENCES Movies(MovieID)
 );
 
-INSERT INTO Members (MemberID, FirstName, LastName, Email)
-VALUES (1, 'John', 'Doe', 'johndoe@example.com'),
-       (2, 'Jane', 'Smith', 'janesmith@example.com'),
-       (3, 'Alice', 'Jones', 'alicejones@example.com');
+INSERT INTO Members (MemberID, FirstName, LastName, Email, UserName, PasswordHash)
+VALUES (1, 'John', 'Doe', 'johndoe@example.com', 'User1', 48690),
+       (2, 'Jane', 'Smith', 'janesmith@example.com', 'User2', 48690),
+       (3, 'Alice', 'Jones', 'alicejones@example.com', 'User3', 48690);
 
-INSERT INTO Librarian (LibrarianID, Email, FirstName, LastName)
-VALUES (1, 'librarian1@library.com', 'Michael', 'Brown'),
-       (2, 'librarian2@library.com', 'Sarah', 'Lee'),
-       (3, 'librarian3@library.com', 'David', 'Williams');
+INSERT INTO Librarians (LibrarianID, Email, FirstName, LastName, UserName, PasswordHash)
+VALUES (1, 'librarian1@library.com', 'Michael', 'Brown', 'Lib1', 48690),
+       (2, 'librarian2@library.com', 'Sarah', 'Lee', 'Lib2', 48690),
+       (3, 'librarian3@library.com', 'David', 'Williams', 'Lib3', 48690);
 
 INSERT INTO Books (BookID, Genre, Title, Author, ISBN, TotalCopies, AvailableCopies)
 VALUES (1, 'Science Fiction', 'The Martian', 'Andy Weir', '978-0316203761', 3, 3),

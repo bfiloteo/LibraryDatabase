@@ -12,25 +12,24 @@ import java.time.LocalDate;
 
 public class MemberPage extends JFrame {
     public static final String backPrompt = "Back to Main Menu";
-    private JPanel allBorrowedPanel = null;
+    private JPanel allLoansPanel = null;
     Member member;
     ArrayList<Transaction> loans; // all outstanding borrowed media
     private Connection conn = null;
     private Statement stmt = null;
     private ResultSet rs = null;
 
-    public MemberPage() {
+    public MemberPage(int memberID) {
         super("Account Info");
         createSQLConnection();
         loans = new ArrayList<>();
-        int memberID = 1; // TODO must pass in member ID from login page
         JButton backButton = new JButton(backPrompt);
 
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose(); 
-                new DashboardPage(); 
+                new DashboardPage(memberID); 
             }
         });
 
@@ -48,14 +47,14 @@ public class MemberPage extends JFrame {
         accountInfoPanel.add(lastNameLabel);
         accountInfoPanel.add(emailLabel);
         
-        // Borrowed Panel (articles, books, movies)
-        allBorrowedPanel = new JPanel();
-        allBorrowedPanel.setLayout(new BoxLayout(allBorrowedPanel, BoxLayout.Y_AXIS));
+        // Loans Panel (articles, books, movies)
+        allLoansPanel = new JPanel();
+        allLoansPanel.setLayout(new BoxLayout(allLoansPanel, BoxLayout.Y_AXIS));
         createSQLQuery();
-        updateAllBorrowedPanel();
+        updateAllLoansPanel();
 
         // Scrollbar feature
-        JScrollPane scrollPane = new JScrollPane(allBorrowedPanel);
+        JScrollPane scrollPane = new JScrollPane(allLoansPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         setLayout(new BorderLayout());
@@ -70,36 +69,56 @@ public class MemberPage extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
-    private void updateAllBorrowedPanel()
+    private void updateAllLoansPanel()
     {
-        allBorrowedPanel.removeAll();
+        String[] header = {"Title", "Media", "Borrow Date", "Due Date", ""};
+        allLoansPanel.removeAll();
+        allLoansPanel.add(makePanel(header));
 
-        for (Transaction transaction : loans) { 
-            JPanel borrowedPanel = new JPanel();
-            borrowedPanel.setLayout(new GridLayout(1, 5));
-
-            JLabel titleLabel = new JLabel(transaction.getTitle());
-            JLabel mediaTypeLabel = new JLabel(transaction.getMediaType());
-            JLabel borrowedDateLabel = new JLabel(transaction.getTransactionDate().toString());
-            JLabel dueDateLabel = new JLabel(transaction.getDueDate().toString());
-
-            JButton returnButton = new JButton("Return");
-            returnButton.addActionListener(new ReturnButtonActionListener(transaction));
-
-            borrowedPanel.add(titleLabel);
-            borrowedPanel.add(mediaTypeLabel);
-            borrowedPanel.add(borrowedDateLabel);
-            borrowedPanel.add(dueDateLabel);
-            borrowedPanel.add(returnButton);
-
-            borrowedPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
-            allBorrowedPanel.add(borrowedPanel);
+        for (Transaction loan : loans) { 
+            String[] labels = {loan.getTitle(), 
+                               loan.getMediaType(), 
+                               loan.getTransactionDate().toString(), 
+                               loan.getDueDate().toString(),
+                               "Return"};
+            allLoansPanel.add(makePanelWithButton(labels, loan));
         }
 
         revalidate();
         repaint();
     }
+
+    private JPanel makePanel(String[] labels)
+    {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(1, labels.length));
+        for(int i = 0; i < labels.length; i++)
+        {
+            JLabel label = new JLabel(labels[i]);
+            panel.add(label);
+        }
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        return panel;
+    }
+
+    private JPanel makePanelWithButton(String[] labels, Transaction loan)
+    {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(1, labels.length));
+        for(int i = 0; i < labels.length - 1; i++)
+        {
+            JLabel label = new JLabel(labels[i]);
+            panel.add(label);
+        }
+        // Last grid is button
+        JButton button = new JButton(labels[labels.length - 1]);
+        button.addActionListener(new ReturnButtonActionListener(loan));
+        panel.add(button);
+
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        return panel;
+    }
+
     private class ReturnButtonActionListener implements ActionListener {
         private Transaction transaction;
 
@@ -220,7 +239,7 @@ public class MemberPage extends JFrame {
                     // if borrow transaction type
                     if(rs.getString(3).equals("borrow"))
                     {
-                        // then add to borrowed list
+                        // then add to loans list
                         Transaction transaction = new Transaction();
                         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                         // Column indexes must match order of SELECT query, starting from index 1
@@ -376,7 +395,7 @@ public class MemberPage extends JFrame {
             catch (SQLException ex) { handleSQLException(ex); }
             finally { releaseSQLResources(); }
             removeBorrowedMedia(transaction.getMediaType(), transaction.getArticleID(), transaction.getBookID(), transaction.getMovieID());
-            updateAllBorrowedPanel();
+            updateAllLoansPanel();
             LocalDate transactionDate = LocalDate.now();
             Random rand = new Random(); // generate random number for transaction ID
             int transactionID = transactionDate.hashCode() + (transaction.getMemberID() * 1024) + rand.nextInt();

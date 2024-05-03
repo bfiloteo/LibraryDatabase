@@ -9,7 +9,7 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 
 public class TransactionPage extends JFrame {
-    public static final String backPrompt = "Back to Main Menu";
+    public static final String closePrompt = "Close window";
     private JPanel allTransactionsPanel = null;
     Member member;
     ArrayList<Transaction> transactions; // all transactions
@@ -17,18 +17,16 @@ public class TransactionPage extends JFrame {
     private Statement stmt = null;
     private ResultSet rs = null;
 
-    public TransactionPage() {
+    public TransactionPage(int memberID) {
         super("Your Transactions"); // Ideally change this to display the first name of the member
         createSQLConnection();
         transactions = new ArrayList<>();
-        int memberID = 1; // TODO must pass in member ID from login page
-        JButton backButton = new JButton(backPrompt);
+        JButton closeButton = new JButton(closePrompt);
 
-        backButton.addActionListener(new ActionListener() {
+        closeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose(); 
-                new DashboardPage(); 
             }
         });
 
@@ -37,10 +35,10 @@ public class TransactionPage extends JFrame {
 
         // Search Panel
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.add(backButton, BorderLayout.WEST);
+        topPanel.add(closeButton, BorderLayout.WEST);
 
         // Transaction Panel
-        JPanel allTransactionsPanel = new JPanel();
+        allTransactionsPanel = new JPanel();
         allTransactionsPanel.setLayout(new BoxLayout(allTransactionsPanel, BoxLayout.Y_AXIS));
         createSQLQuery();
         updateAllTransactionsPanel();
@@ -63,25 +61,35 @@ public class TransactionPage extends JFrame {
     private void updateAllTransactionsPanel()
     {
         allTransactionsPanel.removeAll();
-
-        for (Transaction transaction : transactions) { 
+        // if there are no transactions, then print out an info message
+        if(transactions.size() == 0)
+        {
+            JLabel infoLabel = new JLabel("No transactions found.");
             JPanel transactionPanel = new JPanel();
             transactionPanel.setLayout(new GridLayout(1, 4));
-
-            JLabel titleLabel = new JLabel(transaction.getTitle());
-            JLabel mediaTypeLabel = new JLabel(transaction.getMediaType());
-            JLabel transactionTypeLabel = new JLabel(transaction.getTransactionType());
-            JLabel transactionDateLabel = new JLabel(transaction.getTransactionDate().toString());
-
-            transactionPanel.add(titleLabel);
-            transactionPanel.add(mediaTypeLabel);
-            transactionPanel.add(transactionTypeLabel);
-            transactionPanel.add(transactionDateLabel);
-            // TODO: return status???
-            transactionPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
+            transactionPanel.add(infoLabel);
             allTransactionsPanel.add(transactionPanel);
         }
+        // else display all the transactions, one per row
+        else
+            for (Transaction transaction : transactions) { 
+                JPanel transactionPanel = new JPanel();
+                transactionPanel.setLayout(new GridLayout(1, 4));
+
+                JLabel titleLabel = new JLabel(transaction.getTitle());
+                JLabel mediaTypeLabel = new JLabel(transaction.getMediaType());
+                JLabel transactionTypeLabel = new JLabel(transaction.getTransactionType());
+                JLabel transactionDateLabel = new JLabel(transaction.getTransactionDate().toString());
+
+                transactionPanel.add(titleLabel);
+                transactionPanel.add(mediaTypeLabel);
+                transactionPanel.add(transactionTypeLabel);
+                transactionPanel.add(transactionDateLabel);
+                // TODO: return status???
+                transactionPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+                allTransactionsPanel.add(transactionPanel);
+            }
 
         revalidate();
         repaint();

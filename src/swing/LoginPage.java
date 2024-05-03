@@ -1,12 +1,21 @@
 package swing;
+import library.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.*;
 
 public class LoginPage extends JFrame {
+    private Connection conn = null;
+    private Statement stmt = null;
+    private ResultSet rs = null;
+    private int memberID = 0;
+    private int librarianID = 0;
+
     public LoginPage() {
         super("Login");
+        createSQLConnection();
 
         JPanel mainPanel = new JPanel(new GridLayout());
         
@@ -30,7 +39,6 @@ public class LoginPage extends JFrame {
         libraryLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         leftPanel.add(libraryLabel);
         leftPanel.add(Box.createVerticalGlue()); 
-
 
         // Right panel that has login information and components
         // https://www.javatpoint.com/java-gridbaglayout
@@ -70,14 +78,16 @@ public class LoginPage extends JFrame {
                 String enteredPassword = new String(passwordField.getPassword());
 
                 // Check if the username and password are valid. In this case it's test and 123
-                if (enteredUsername.equals("test") && enteredPassword.equals("123")) {
+                //if (enteredUsername.equals("test") && enteredPassword.equals("123")) {
+                if(createSQLQuery("member", enteredUsername, enteredPassword)) {
                     JOptionPane.showMessageDialog(LoginPage.this, "Login successful", "Success", JOptionPane.INFORMATION_MESSAGE);
                     dispose();
-                    new DashboardPage(); // Opens the librarian page ui
-                } else if (enteredUsername.equals("admin") && enteredPassword.equals("123")) {
+                    new DashboardPage(memberID); // Opens the member page UI
+                //} else if (enteredUsername.equals("admin") && enteredPassword.equals("123")) {
+                } else if(createSQLQuery("librarian", enteredUsername, enteredPassword)) {
                     JOptionPane.showMessageDialog(LoginPage.this, "Admin Login successful", "Success", JOptionPane.INFORMATION_MESSAGE);
                     dispose();
-                    new LibrarianPage();
+                    new LibrarianPage(librarianID); // Opens the librarian page UI
                 } else {
                     JOptionPane.showMessageDialog(LoginPage.this, "Invalid email or password", "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -144,5 +154,116 @@ public class LoginPage extends JFrame {
 
     public static void main(String[] args) {
         new LoginPage();
+    }
+
+    // SQL connection
+    private void createSQLConnection()
+    {
+        try
+        {
+            // The newInstance() call is a work around for some broken Java implementations.
+            // default for running on local:
+            //conn = DriverManager.getConnection("jdbc:mysql://localhost/<database name>?" +
+            //"user=<username: may be root>&password=<password>");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=329761");
+            Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
+        }
+        catch (SQLException ex) { handleSQLException(ex); }
+        catch (Exception e)
+        {
+            System.out.println("Error." + e.getMessage());
+        }
+    }
+
+    private boolean createSQLQuery(String userType, String enteredUsername, String enteredPassword)
+    {
+        String stmtString;
+        if(userType.equals("member"))
+            stmtString = "SELECT MemberID FROM Members WHERE UserName = \"" + enteredUsername + 
+                         "\" AND PasswordHash = " + enteredPassword.hashCode() + ";";
+        else
+            stmtString = "SELECT LibrarianID FROM Librarians WHERE UserName = \"" + enteredUsername + 
+                         "\" AND PasswordHash = " + enteredPassword.hashCode() + ";";
+
+        System.out.println(stmtString);
+        
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(stmtString);
+        
+            // Now do something with the ResultSet ....
+            if (rs != null) {
+                ResultSetMetaData md = rs.getMetaData();
+                int cols = md.getColumnCount();
+                System.out.println("Columns = " + cols);
+                for (int i = 0; i < cols; i++) {
+                    String name = md.getColumnLabel(i + 1);
+                    System.out.print(name + "\t");
+                }
+                System.out.println("");
+
+                while (rs.next()) {
+                    System.out.print("Row\t");
+                    for (int i = 0; i < cols; i++) {
+                        String value = rs.getString(i + 1);
+                        System.out.print(value + "\t");
+                    }
+                    System.out.println("");
+
+                    // Column indexes must match order of SELECT query, starting from index 1
+                    if(userType.equals("member"))
+                    {
+                        memberID = rs.getInt(1);
+                        System.out.println("Found member " + memberID + " with userName = " + enteredUsername + 
+                                           " and password = " + enteredPassword + " in Members table");
+                    }
+                    else
+                    {
+                        librarianID = rs.getInt(1);
+                        System.out.println("Found librarian " + librarianID + " with userName = " + enteredUsername + 
+                                           " and password = " + enteredPassword + " in Librarians table");
+                    }
+                    releaseSQLResources();
+                    return true;
+                }
+                if(userType.equals("member"))
+                    System.out.println("Error: did not find member with userName = " + enteredUsername + 
+                                       " and password = " + enteredPassword + " in Members table");
+                else
+                    System.out.println("Error: did not find librarian with userName = " + enteredUsername + 
+                                       " and password = " + enteredPassword + " in Librarians table");
+            }
+        }
+        catch (SQLException ex) { handleSQLException(ex); }
+        catch (Exception ex) { System.out.println(ex.getMessage());}
+        finally { releaseSQLResources(); }
+        return false;
+    }
+
+    private void handleSQLException(SQLException ex)
+    {
+        // handle any errors
+        System.out.println("SQLException: " + ex.getMessage());
+        System.out.println("SQLState: " + ex.getSQLState());
+        System.out.println("VendorError: " + ex.getErrorCode());
+    }
+    private void releaseSQLResources()
+    {
+        // Release resources in a finally{} block in reverse-order of their creation
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException sqlEx) { } // ignore
+    
+            rs = null;
+        }
+    
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException sqlEx) { } // ignore
+    
+            stmt = null;
+        }
     }
 }

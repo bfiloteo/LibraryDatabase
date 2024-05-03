@@ -6,7 +6,7 @@ import java.awt.event.*;
 
 public class DashboardPage extends JFrame {
 
-    public DashboardPage() {
+    public DashboardPage(int memberID) {
 
         super("Select What You Want to View From Our Library");
 
@@ -125,7 +125,7 @@ public class DashboardPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
-                new BooksPage();
+                new BooksPage(memberID);
             }
         });
 
@@ -133,7 +133,7 @@ public class DashboardPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
-                new MoviesPage();
+                new MoviesPage(memberID);
             }
         });
 
@@ -141,7 +141,7 @@ public class DashboardPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
-                new ArticlesPage();
+                new ArticlesPage(memberID);
             }
         });
 
@@ -149,7 +149,7 @@ public class DashboardPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
-                new MemberPage();
+                new MemberPage(memberID);
             }
         });
 

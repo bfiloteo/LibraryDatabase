@@ -10,24 +10,29 @@ import java.time.LocalDate;
 import java.sql.*;
 
 public class MoviesPage extends JFrame {
+    public static final String SQLTableName = "Movies";
+    public static final String SQLItemIDName = "MovieID";
+    public static final String mediaType = "movie";
     public static final String searchPrompt = "Enter the movie's title or director";
     public static final String backPrompt = "Back to Main Menu";
     public static final int WeeksToBorrow = 3;
+    private int memberID = 0;
     private JTextField searchField;
-    private JPanel allMoviesPanel = null;
-    ArrayList<Movie> movies;    
+    private JPanel allItemsPanel = null;
+    ArrayList<Movie> items;    
     private Connection conn = null;
     private Statement stmt = null;
     private ResultSet rs = null;
 
-    public MoviesPage() {
-        super("Movies");
+    public MoviesPage(int memberID) {
+        super(SQLTableName);
+        this.memberID = memberID;
         createSQLConnection();
-        movies = new ArrayList<>();
 
         // Movies Panel
-        allMoviesPanel = new JPanel();
-        allMoviesPanel.setLayout(new BoxLayout(allMoviesPanel, BoxLayout.Y_AXIS));
+        items = new ArrayList<>();
+        allItemsPanel = new JPanel();
+        allItemsPanel.setLayout(new BoxLayout(allItemsPanel, BoxLayout.Y_AXIS));
 
         searchField = new JTextField(searchPrompt);
         searchField.setMinimumSize(new Dimension(200, searchField.getPreferredSize().height));
@@ -39,16 +44,16 @@ public class MoviesPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose(); 
-                new DashboardPage(); 
+                new DashboardPage(memberID); 
             }
         });
 
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Add functionality code here for when the user searches for a movie
-                CreateSQLQuery(searchField.getText());
-                updateAllMoviesPanel();
+                // Add functionality code here for when the user searches for a item
+                createSQLQuery(searchField.getText());
+                updateAllItemsPanel();
             }
         });
 
@@ -78,7 +83,7 @@ public class MoviesPage extends JFrame {
         searchPanel.add(searchButton, BorderLayout.EAST);
         
         // Scrollbar feature
-        JScrollPane scrollPane = new JScrollPane(allMoviesPanel);
+        JScrollPane scrollPane = new JScrollPane(allItemsPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         setLayout(new BorderLayout());
@@ -93,55 +98,75 @@ public class MoviesPage extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
-    private void updateAllMoviesPanel()
+    private void updateAllItemsPanel()
     {
-        allMoviesPanel.removeAll();
+        String[] header = {"Title", "Director", "Release Year", "Copies Available", ""};
+        allItemsPanel.removeAll();
+        allItemsPanel.add(makePanel(header));
 
-        // Add movies into a list like view.
-        for (Movie movie : movies) {
-            JPanel moviePanel = new JPanel();
-            moviePanel.setLayout(new GridLayout( 1, 6));
-
-            JLabel titleLabel = new JLabel(movie.getTitle());
-            JLabel directorLabel = new JLabel(movie.getDirector());
-            JLabel releaseYearLabel = new JLabel("" + movie.getReleaseYear());
-            JLabel availableCopiesLabel = new JLabel("" + movie.getAvailableCopies());
-            JLabel totalCopiesLabel = new JLabel("" + movie.getTotalCopies());
-
-            JButton borrowButton = new JButton("Borrow");
-            borrowButton.addActionListener(new BorrowButtonActionListener(movie));
-
-            moviePanel.add(titleLabel);
-            moviePanel.add(directorLabel);
-            moviePanel.add(releaseYearLabel);
-            moviePanel.add(totalCopiesLabel);
-            moviePanel.add(availableCopiesLabel);
-            moviePanel.add(borrowButton);
-
-            // Creates the black like between each movie
-            moviePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
-            allMoviesPanel.add(moviePanel);
+        // Add items into a list like view.
+        for (Movie item : items) {
+            String[] labels = {item.getTitle(), 
+                               item.getDirector(), 
+                               "" + item.getReleaseYear(), 
+                               item.getAvailableCopies() + " of " + item.getTotalCopies(), 
+                               item.getAvailableCopies() > 0 ? "Borrow" : "Unavailable"};
+            if( item.getAvailableCopies() > 0)
+                allItemsPanel.add(makePanelWithButton(labels, item));
+            else
+                // TODO: turn into Hold button
+                allItemsPanel.add(makePanel(labels));
         }
 
         revalidate();
         repaint();
     }
     
+    private JPanel makePanel(String[] labels)
+    {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(1, labels.length));
+        for(int i = 0; i < labels.length; i++)
+        {
+            JLabel label = new JLabel(labels[i]);
+            panel.add(label);
+        }
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        return panel;
+    }
+
+    private JPanel makePanelWithButton(String[] labels, Movie item)
+    {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(1, labels.length));
+        for(int i = 0; i < labels.length - 1; i++)
+        {
+            JLabel label = new JLabel(labels[i]);
+            panel.add(label);
+        }
+        // Last grid is button
+        JButton button = new JButton(labels[labels.length - 1]);
+        button.addActionListener(new BorrowButtonActionListener(item));
+        panel.add(button);
+
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        return panel;
+    }
+
     // This class ensures that each button to the book will be its own button to the corresponding book,
     // so that when the user decides to borrow the book,
     // the button to borrow it will know what book the user chose.
     private class BorrowButtonActionListener implements ActionListener {
-        private Movie movie;
+        private Movie item;
 
-        public BorrowButtonActionListener(Movie movie) {
-            this.movie = movie;
+        public BorrowButtonActionListener(Movie item) {
+            this.item = item;
         }
 
-        // Code to add after the person borrows a movie.
+        // Code to add after the person borrows a item.
         @Override
         public void actionPerformed(ActionEvent e) {
-            createSQLUpdate(movie);
+            createSQLUpdate(item);
         }
     }
     
@@ -165,13 +190,13 @@ public class MoviesPage extends JFrame {
     }   
 
     // Search: SQL Query
-    // Search call for using the search bar in movies page.
-    private void CreateSQLQuery(String searchText)
+    // Search call for using the search bar in items page.
+    private void createSQLQuery(String searchText)
     {
         String[] searchWords = searchText.split(" ");
 
-        String stmtString = "SELECT MovieID, Title, Director, ReleaseYear, TotalCopies, AvailableCopies FROM Movies " + 
-                            "WHERE Title LIKE \"%" + searchWords[0] + "%\" OR Director LIKE \"%" + searchWords[0] + "%\"";
+        String stmtString = "SELECT " + SQLItemIDName + ", Title, Director, ReleaseYear, TotalCopies, AvailableCopies FROM " + SQLTableName +
+                            " WHERE Title LIKE \"%" + searchWords[0] + "%\" OR Director LIKE \"%" + searchWords[0] + "%\"";
         for (int i = 1; i < searchWords.length; i++)
             stmtString += "OR Title LIKE \"%" + searchWords[i] + "%\" OR Director LIKE \"%" + searchWords[i] + "%\"";
         stmtString += ";";
@@ -192,7 +217,7 @@ public class MoviesPage extends JFrame {
                 }
                 System.out.println("");
 
-                movies.clear(); // remove previous search results
+                items.clear(); // remove previous search results
                 while (rs.next()) {
                     System.out.print("Row\t");
                     for (int i = 0; i < cols; i++) {
@@ -200,26 +225,27 @@ public class MoviesPage extends JFrame {
                         System.out.print(value + "\t");
                     }
                     System.out.println("");
-                    Movie movie = new Movie();
+                    Movie item = new Movie();
                     // Column indexes must match order of SELECT query, starting from index 1
-                    movie.setMovieID(rs.getInt(1));
-                    movie.setTitle(rs.getString(2));
-                    movie.setDirector(rs.getString(3));
-                    movie.setReleaseYear(rs.getInt(4));
-                    movie.setAvailableCopies(rs.getInt(5));
-                    movie.setTotalCopies(rs.getInt(6));
-                    movies.add(movie);
+                    int index = 1;
+                    item.setItemID(rs.getInt(index++));
+                    item.setTitle(rs.getString(index++));
+                    item.setDirector(rs.getString(index++));
+                    item.setReleaseYear(rs.getInt(index++));
+                    item.setAvailableCopies(rs.getInt(index++));
+                    item.setTotalCopies(rs.getInt(index++));
+                    items.add(item);
                 }
             }
         }
         catch (SQLException ex) { handleSQLException(ex); }
         finally { releaseSQLResources(); }
     }    
-    private void createSQLUpdate(Movie movie)
+    private void createSQLUpdate(Movie item)
     {
         // Do SQL query to get number of available copies
         int availableCopies = 0;
-        String stmtString = "SELECT AvailableCopies FROM Movies WHERE MovieID = " + movie.getMovieID() + ";";
+        String stmtString = "SELECT AvailableCopies FROM " + SQLTableName + " WHERE " + SQLItemIDName + " = " + item.getItemID() + ";";
         System.out.println(stmtString);
         try {
             stmt = conn.createStatement();
@@ -236,12 +262,12 @@ public class MoviesPage extends JFrame {
         catch (SQLException ex) { handleSQLException(ex); }
         finally { releaseSQLResources(); }
 
-        // if there is an available copy, then update Movies table to reduce available copies by 1
-        // and update Transactions table to borrow the movie
+        // if there is an available copy, then update items table to reduce available copies by 1
+        // and update Transactions table to borrow the item
         if( availableCopies > 0)
         {
             availableCopies--;
-            stmtString = "UPDATE Movies SET AvailableCopies = " + availableCopies + " WHERE MovieID = " + movie.getMovieID() + ";";
+            stmtString = "UPDATE " + SQLTableName + " SET AvailableCopies = " + availableCopies + " WHERE " + SQLItemIDName + " = " + item.getItemID() + ";";
             System.out.println(stmtString);
             try {
                 stmt = conn.createStatement();
@@ -249,19 +275,18 @@ public class MoviesPage extends JFrame {
             }
             catch (SQLException ex) { handleSQLException(ex); }
             finally { releaseSQLResources(); }
-            movie.setAvailableCopies(availableCopies); // update movie with decremented availableCopies
-            updateAllMoviesPanel();
+            item.setAvailableCopies(availableCopies); // update item with decremented availableCopies
+            updateAllItemsPanel();
 
             LocalDate transactionDate = LocalDate.now();
             LocalDate dueDate = LocalDate.now();
             dueDate.plusWeeks(WeeksToBorrow);
-            int memberID = 1; // TODO placeholder
             Random rand = new Random(); // generate random number for transaction ID
-            int transactionID = transactionDate.hashCode() + movie.getMovieID() + (memberID * 1024) + rand.nextInt();
+            int transactionID = transactionDate.hashCode() + item.getItemID() + (memberID * 1024) + rand.nextInt();
             if( transactionID < 0 ) transactionID = -transactionID; // make transactionID positive
             // TODO check for collisions in Transactions table
-            stmtString = "INSERT INTO Transactions (TransactionID, TransactionType, MediaType, TransactionDate, DueDate, MemberID, MovieID) VALUES (" +
-                         transactionID + ", \"borrow\", \"movie\", \"" + transactionDate + "\", \"" + dueDate + "\", " + memberID + ", " + movie.getMovieID() + ");";
+            stmtString = "INSERT INTO Transactions (TransactionID, TransactionType, MediaType, TransactionDate, DueDate, MemberID, " + SQLItemIDName + ") VALUES (" +
+                         transactionID + ", \"borrow\", \"" + mediaType + "\", \"" + transactionDate + "\", \"" + dueDate + "\", " + memberID + ", " + item.getItemID() + ");";
             System.out.println(stmtString);
             try {
                 stmt = conn.createStatement();
@@ -270,8 +295,9 @@ public class MoviesPage extends JFrame {
             catch (SQLException ex) { handleSQLException(ex); }
             finally { releaseSQLResources(); }
         }
-        // TODO else display error message indicating no available copies to borrow
-    }
+        else
+            System.out.println("Cannot borrow " + item.getTitle() + " since available copies = " + item.getAvailableCopies());
+ }
 
     private void handleSQLException(SQLException ex)
     {

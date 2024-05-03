@@ -1,34 +1,20 @@
 package library;
 
-public class Book {
-    private int bookID;
-    private String genre;
+public class Book extends Item {
     private String title;
     private String author;
-    private int ISBN;
-    private int availableCopies;
-    private int totalCopies;
+    private String genre;
+    private String ISBN;
 
     // Constructor to initialize all fields
     public Book() {
-        bookID = 0;
-        genre = "";
         title = "";
         author = "";
-        ISBN = 0;
-        availableCopies = 0;
-        totalCopies = 0;
+        genre = "";
+        ISBN = "";
     }
     
     // Getters for all fields
-    public int getBookID() {
-        return bookID;
-    }
-    
-    public String getGenre() {
-        return genre;
-    }
-    
     public String getTitle() {
         return title;
     }
@@ -37,27 +23,15 @@ public class Book {
         return author;
     }
     
-    public int getISBN() {
+    public String getGenre() {
+        return genre;
+    }
+    
+    public String getISBN() {
         return ISBN;
     }
     
-    public int getAvailableCopies() {
-        return availableCopies;
-    }
-    
-    public int getTotalCopies() {
-        return totalCopies;
-    }
-    
     // Setters for all fields
-    public void setBookID(int bookID) {
-        this.bookID = bookID;
-    }
-    
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-    
     public void setTitle(String title) {
         this.title = title;
     }
@@ -66,15 +40,11 @@ public class Book {
         this.author = author;
     }
     
-    public void setISBN(int ISBN) {
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+    
+    public void setISBN(String ISBN) {
         this.ISBN = ISBN;
-    }
-    
-    public void setAvailableCopies(int availableCopies) {
-        this.availableCopies = availableCopies;
-    }
-    
-    public void setTotalCopies(int totalCopies) {
-        this.totalCopies = totalCopies;
     }
 }
