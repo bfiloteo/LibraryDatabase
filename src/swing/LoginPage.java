@@ -69,7 +69,6 @@ public class LoginPage extends JFrame {
         gbc.gridwidth = 2;
         loginPanel.add(buttonPanel, gbc);
 
-
         // ActionListener for login button
         loginButton.addActionListener(new ActionListener() {
             @Override

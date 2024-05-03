@@ -1,12 +1,27 @@
 package swing;
 
 import javax.swing.*;
+
+import library.Item;
+
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.*;
 
 public class RegisterPage extends JFrame {
+    public static final String usernamePrompt = "Username";
+    public static final String passwordPrompt = "Password";
+    public static final String firstNamePrompt = "First name";
+    public static final String lastNamePrompt = "Last name";
+    public static final String emailPrompt = "Email          ";
+
+    private Connection conn = null;
+    private Statement stmt = null;
+    private ResultSet rs = null;
+
     public RegisterPage() {
         super("Register");
+        createSQLConnection();
 
         JPanel mainPanel = new JPanel(new GridLayout());
         
@@ -37,23 +52,71 @@ public class RegisterPage extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
+        JPanel usernamePanel = new JPanel();
+        usernamePanel.setLayout(new BoxLayout(usernamePanel, BoxLayout.X_AXIS));
+        JLabel usernameLabel = new JLabel(usernamePrompt);
         JTextField usernameField = new JTextField(15);
+        usernamePanel.add(usernameLabel);
+        usernamePanel.add(usernameField);
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
-        registerPanel.add(usernameField, gbc);
+        registerPanel.add(usernamePanel, gbc);
 
+        JPanel passwordPanel = new JPanel();
+        passwordPanel.setLayout(new BoxLayout(passwordPanel, BoxLayout.X_AXIS));
+        JLabel passwordLabel = new JLabel(passwordPrompt);
         JPasswordField passwordField = new JPasswordField(15);
+        passwordPanel.add(passwordLabel);
+        passwordPanel.add(passwordField);
         gbc.gridx = 1;
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        registerPanel.add(passwordField, gbc);
+        registerPanel.add(passwordPanel, gbc);
 
+        JPanel confirmPasswordPanel = new JPanel();
+        confirmPasswordPanel.setLayout(new BoxLayout(confirmPasswordPanel, BoxLayout.X_AXIS));
+        JLabel confirmPasswordLabel = new JLabel(passwordPrompt);
         JPasswordField confirmPasswordField = new JPasswordField(15);
+        confirmPasswordPanel.add(confirmPasswordLabel);
+        confirmPasswordPanel.add(confirmPasswordField);
         gbc.gridx = 1;
         gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.WEST;
-        registerPanel.add(confirmPasswordField, gbc);
+        registerPanel.add(confirmPasswordPanel, gbc);
+
+        JPanel firstNamePanel = new JPanel();
+        firstNamePanel.setLayout(new BoxLayout(firstNamePanel, BoxLayout.X_AXIS));
+        JLabel firstNameLabel = new JLabel(firstNamePrompt);
+        JTextField firstNameField = new JTextField(15);
+        firstNamePanel.add(firstNameLabel);
+        firstNamePanel.add(firstNameField);
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.WEST;
+        registerPanel.add(firstNamePanel, gbc);
+
+        JPanel lastNamePanel = new JPanel();
+        lastNamePanel.setLayout(new BoxLayout(lastNamePanel, BoxLayout.X_AXIS));
+        JLabel lastNameLabel = new JLabel(lastNamePrompt);
+        JTextField lastNameField = new JTextField(15);
+        lastNamePanel.add(lastNameLabel);
+        lastNamePanel.add(lastNameField);
+        gbc.gridx = 1;
+        gbc.gridy = 5;
+        gbc.anchor = GridBagConstraints.WEST;
+        registerPanel.add(lastNamePanel, gbc);
+
+        JPanel emailPanel = new JPanel();
+        emailPanel.setLayout(new BoxLayout(emailPanel, BoxLayout.X_AXIS));
+        JLabel emailLabel = new JLabel(emailPrompt);
+        JTextField emailField = new JTextField(15);
+        emailPanel.add(emailLabel);
+        emailPanel.add(emailField);
+        gbc.gridx = 1;
+        gbc.gridy = 6;
+        gbc.anchor = GridBagConstraints.WEST;
+        registerPanel.add(emailPanel, gbc);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton backButton = new JButton("Back");
@@ -62,7 +125,7 @@ public class RegisterPage extends JFrame {
         buttonPanel.add(backButton);
         buttonPanel.add(registerButton);
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 7;
         gbc.gridwidth = 2;
         registerPanel.add(buttonPanel, gbc);
 
@@ -79,19 +142,24 @@ public class RegisterPage extends JFrame {
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String enteredEmail = usernameField.getText();
-                String enteredPassword = new String(passwordField.getPassword());
+                String username = usernameField.getText();
+                String password = new String(passwordField.getPassword());
                 String confirmedPassword = new String(confirmPasswordField.getPassword());
+                String firstName = firstNameField.getText();
+                String lastName = lastNameField.getText();
+                String email = emailField.getText();
 
-                if (enteredEmail.isEmpty() || enteredPassword.isEmpty() || confirmedPassword.isEmpty()) {
+                if (username.isEmpty() || password.isEmpty() || confirmedPassword.isEmpty() || firstName.isEmpty() || lastName.isEmpty() || email.isEmpty()) {
                     JOptionPane.showMessageDialog(RegisterPage.this, "Please fill in all fields", "Error", JOptionPane.ERROR_MESSAGE);
-                } else if (!enteredPassword.equals(confirmedPassword)) {
+                } else if (!password.equals(confirmedPassword)) {
                     JOptionPane.showMessageDialog(RegisterPage.this, "Passwords do not match", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
+                    // Todo: check for username collision in Members table
+                    int memberID = createSQLUpdate(username, password, firstName, lastName, email);
                     // Successful registration, ideally add it to where the account will be added to the database.
                     JOptionPane.showMessageDialog(RegisterPage.this, "Registration successful", "Success", JOptionPane.INFORMATION_MESSAGE);
-                   dispose();
-                   new DashboardPage(); 
+                    dispose();
+                    new DashboardPage(memberID); 
                 }
             }
         });
@@ -163,4 +231,84 @@ public class RegisterPage extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
+    // SQL connection
+    private void createSQLConnection()
+    {
+        try
+        {
+            // The newInstance() call is a work around for some broken Java implementations.
+            // default for running on local:
+            //conn = DriverManager.getConnection("jdbc:mysql://localhost/<database name>?" +
+            //"user=<username: may be root>&password=<password>");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=329761");
+            Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
+        }
+        catch (SQLException ex) { handleSQLException(ex); }
+        catch (Exception e)
+        {
+            System.out.println("Error." + e.getMessage());
+        }
+    }   
+
+    // Update Members SQL table with new member and return memberID of new member
+    private int createSQLUpdate(String username, String password, String firstName, String lastName, String email)
+    {
+        // Do SQL query to get the largest current memberID
+        int memberID = 0;
+        String stmtString = "SELECT MAX(MemberID) FROM Members;";
+        System.out.println(stmtString);
+        try {
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(stmtString);
+        
+            // Now do something with the ResultSet ....
+            if (rs != null) {
+                while (rs.next()) {
+                    memberID = rs.getInt(1);
+                    System.out.println("Max memberID =\t" + memberID);
+                }
+            }
+        }
+        catch (SQLException ex) { handleSQLException(ex); }
+        finally { releaseSQLResources(); }
+
+        memberID++; // new memberID is one larger than current max memberID
+        stmtString = "INSERT INTO Members (MemberID, FirstName, LastName, Email, UserName, PasswordHash)" +
+                     "VALUES (" + memberID + ", '" + firstName + "', '" + lastName + "', '" + email + "', '" + username + "', " + password.hashCode() + ");";
+        System.out.println(stmtString);
+        try {
+            stmt = conn.createStatement();
+            stmt.execute(stmtString);
+        }
+        catch (SQLException ex) { handleSQLException(ex); }
+        finally { releaseSQLResources(); }
+        return memberID;
+    }
+
+    private void handleSQLException(SQLException ex)
+    {
+        // handle any errors
+        System.out.println("SQLException: " + ex.getMessage());
+        System.out.println("SQLState: " + ex.getSQLState());
+        System.out.println("VendorError: " + ex.getErrorCode());
+    }
+    private void releaseSQLResources()
+    {
+        // Release resources in a finally{} block in reverse-order of their creation
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException sqlEx) { } // ignore
+    
+            rs = null;
+        }
+    
+        if (stmt != null) {
+            try {
+                stmt.close();
+            } catch (SQLException sqlEx) { } // ignore
+    
+            stmt = null;
+        }
+    }
 }
