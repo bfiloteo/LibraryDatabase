@@ -179,7 +179,7 @@ public class MoviesPage extends JFrame {
             // default for running on local:
             //conn = DriverManager.getConnection("jdbc:mysql://localhost/<database name>?" +
             //"user=<username: may be root>&password=<password>");
-            conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=329761");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=123456");
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
         }
         catch (SQLException ex) { handleSQLException(ex); }
