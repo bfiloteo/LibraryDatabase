@@ -9,6 +9,7 @@ import java.awt.event.*;
 import java.sql.*;
 
 public class RegisterPage extends JFrame {
+    public static final String SQLPassword = "329761";
     public static final String usernamePrompt = "Username";
     public static final String passwordPrompt = "Password";
     public static final String firstNamePrompt = "First name";
@@ -240,7 +241,7 @@ public class RegisterPage extends JFrame {
             // default for running on local:
             //conn = DriverManager.getConnection("jdbc:mysql://localhost/<database name>?" +
             //"user=<username: may be root>&password=<password>");
-            conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=123456");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=" + SQLPassword);
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
         }
         catch (SQLException ex) { handleSQLException(ex); }

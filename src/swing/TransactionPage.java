@@ -9,6 +9,7 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 
 public class TransactionPage extends JFrame {
+    public static final String SQLPassword = "329761";
     public static final String closePrompt = "Close window";
     private JPanel allTransactionsPanel = null;
     Member member;
@@ -104,7 +105,7 @@ public class TransactionPage extends JFrame {
             // default for running on local:
             //conn = DriverManager.getConnection("jdbc:mysql://localhost/<database name>?" +
             //"user=<username: may be root>&password=<password>");
-            conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=123456");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=" + SQLPassword);
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
         }
         catch (SQLException ex) { handleSQLException(ex); }

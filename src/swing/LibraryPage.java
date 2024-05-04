@@ -10,6 +10,7 @@ import java.sql.*;
 import java.time.LocalDate;
 
 public class LibraryPage extends JFrame {
+    public static final String SQLPassword = "329761";
     public static final String SQLTableName = "Library";
     public static final String searchPrompt = "Find media (article, book, movie) by title, author, director, or genre";
     public static final String backPrompt = "Back to Menu";
@@ -303,7 +304,7 @@ public class LibraryPage extends JFrame {
             // default for running on local:
             //conn = DriverManager.getConnection("jdbc:mysql://localhost/<database name>?" +
             //"user=<username: may be root>&password=<password>");
-            conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=123456");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=" + SQLPassword);
             Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
         }
         catch (SQLException ex) { handleSQLException(ex); }

@@ -35,11 +35,11 @@ Go back to Explorer tab with all the source code. Under the tab called Java Proj
 
 Find and change all the code in the classes:
   From:
-    conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=123456");
+    conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=329761");
   To: (put your mysql password in place of the sample password, same with user with your own username otherwise it's the root)
     conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=<password>");
 
-Best to use the search icon located under the explorer section. Just search "123456" to find it easily.
+Best to use the search icon located under the explorer section. Just search "329761" to find it easily.
 The classes should be: AllMembersPage, ArticlesPage, BooksPage, LibrarianPage, LibraryPage, LoginPage, MemberPage, MoviesPage, RegisterPage, TransactionPage.
 
 In the src code, in the database folder, is a file with all the sql code called library. Copy the whole file and go back to the DB Notebook in MYSQL Shell.
