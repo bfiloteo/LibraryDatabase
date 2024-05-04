@@ -19,6 +19,8 @@ The `JAVA PROJECTS` view allows you to manage your dependencies. More details ca
 
 ## To run Code
 
+Demo run through of this set up at the Library Database Runthrough Setup video.
+
 You need vscode and mysql-connector-j downloaded. mysql-connector-j version used: 8.3.0. Update vscode to latest version too. Use JDK 22 and above. Have MYSQL installed of course.
 
 Clone the github repository in vscode. Have MYSQL shell and Java installed in vscode.
@@ -31,22 +33,18 @@ For MYSQL Shell, create new connection:
 
 After everything, a DB Notebook should be created. Under the tab called Database Connections, all your sql tables that you created should have appeared.
 
-Go back to Explorer tab with all the source code. Under the tab called Java Projects, there should be a folder already there called LibraryDatabase from when you cloned it. Another sub folder called Referenced Libraries should be present at the bottom after the other subfolders, src 100% sure and JRE System Library or JDK. Press the "+" sign on Referenced Libraries to add the mysql-connection-j jar file in the mysql-connection-j folder.
+Go back to Explorer tab with all the source code. Under the tab called Java Projects, there should be a folder already there called LibraryDatabase from when you cloned it. Another sub folder called Referenced Libraries should be present at the bottom after the other subfolders, src 100% sure and JRE System Library or JDK. Press the "+" sign on Referenced Libraries to add the mysql-connection-j jar file in the mysql-connection-j folder. If it's already added, then you're good. But you can always delete it with a minus sign to the right, and then add it in again with the plus sign.
+
+If you know you're under JDK 22, download that from https://www.oracle.com/java/technologies/downloads/
+To apply it to the project, same place as Java Projects where you just added mysql-connection-j folder, right click on "LibraryDatabase" folder, go to Class Configure. Go to tab of JDK Runtime, add your JDK 22 file. You might have to close and reload up the editor first though, especially if file keeps switching back to previous one even if you add it.
 
 Find and change all the code in the classes:
-<<<<<<< HEAD
-  From:
-    conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=329761");
-  To: (put your mysql password in place of the sample password, same with user with your own username otherwise it's the root)
-    conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=<password>");
 
-Best to use the search icon located under the explorer section. Just search "329761" to find it easily.
-=======
     From: public static final String SQLPassword = "329761";
     To: Put your own MYSQL password in there instead of 329761
 
 Best to use the search icon magnifying glass located under the explorer section. Just search "329761" to find it easily.
->>>>>>> 337707992f82b486cdb810b05a509521394e09af
+
 The classes should be: AllMembersPage, ArticlesPage, BooksPage, LibrarianPage, LibraryPage, LoginPage, MemberPage, MoviesPage, RegisterPage, TransactionPage.
 
 In the src code, in the database folder, is a file with all the sql code called library. Copy the whole file and go back to the DB Notebook in MYSQL Shell.
