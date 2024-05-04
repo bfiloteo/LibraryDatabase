@@ -34,17 +34,27 @@ After everything, a DB Notebook should be created. Under the tab called Database
 Go back to Explorer tab with all the source code. Under the tab called Java Projects, there should be a folder already there called LibraryDatabase from when you cloned it. Another sub folder called Referenced Libraries should be present at the bottom after the other subfolders, src 100% sure and JRE System Library or JDK. Press the "+" sign on Referenced Libraries to add the mysql-connection-j jar file in the mysql-connection-j folder.
 
 Find and change all the code in the classes:
+<<<<<<< HEAD
   From:
     conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=329761");
   To: (put your mysql password in place of the sample password, same with user with your own username otherwise it's the root)
     conn = DriverManager.getConnection("jdbc:mysql://localhost/library?" + "user=root&password=<password>");
 
 Best to use the search icon located under the explorer section. Just search "329761" to find it easily.
+=======
+    From: public static final String SQLPassword = "329761";
+    To: Put your own MYSQL password in there instead of 329761
+
+Best to use the search icon magnifying glass located under the explorer section. Just search "329761" to find it easily.
+>>>>>>> 337707992f82b486cdb810b05a509521394e09af
 The classes should be: AllMembersPage, ArticlesPage, BooksPage, LibrarianPage, LibraryPage, LoginPage, MemberPage, MoviesPage, RegisterPage, TransactionPage.
 
 In the src code, in the database folder, is a file with all the sql code called library. Copy the whole file and go back to the DB Notebook in MYSQL Shell.
 
 Make sure DB Notebook is running. It should look like your MYSQL Command Line Client. And if it doesn't, you've got a local problem and need to learn how to connect your MYSQL to vscode.
-Copy paste all the library file into the DB Notebook MYSQL command line that's running. If need to double check, "drop database library;" first before copy pasting the library file into the command line.
+Copy paste all the library file into the DB Notebook MYSQL command line that's running. If need to be 100% sure, "drop database library;" first before copy pasting the library file into the command line.
 
 Now go back to src code and find "LoginPage". Click Run at the top right corner and a window with LibraryDatabase and login requests should appear.
+
+Use User1/User2/User3 for logging in as users. Lib1 or Lib2 or Lib3 for logging in as admin.
+123 is password for all. Unless you register and do your own usernames & passwords.

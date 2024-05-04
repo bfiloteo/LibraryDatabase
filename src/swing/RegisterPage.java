@@ -221,6 +221,54 @@ public class RegisterPage extends JFrame {
             }
         });
 
+        firstNameField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (firstNameField.getText().equals("Enter First Name")) {
+                    firstNameField.setText("");
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (firstNameField.getText().isEmpty()) {
+                    firstNameField.setText("Enter First Name");
+                }
+            }
+        });
+
+        lastNameField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (lastNameField.getText().equals("Enter Last Name")) {
+                    lastNameField.setText("");
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (lastNameField.getText().isEmpty()) {
+                    lastNameField.setText("Enter Last Name");
+                }
+            }
+        });
+
+        emailField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (emailField.getText().equals("Enter Email")) {
+                    emailField.setText("");
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (emailField.getText().isEmpty()) {
+                    emailField.setText("Enter Email");
+                }
+            }
+        });
+
         add(mainPanel);
         mainPanel.add(leftPanel);
         mainPanel.add(registerPanel);
