@@ -29,10 +29,10 @@ Clone the github repository in vscode. Best keep it in Downloads/default reposit
 Have MYSQL shell and Java installed in vscode.
 
 For MYSQL Shell, create new connection:<br>
-  Caption: Localhost 8.0<br>
-  Host Name or IP Address: localhost<br>
-  User Name: root (otherwise _YOUR_ MYSQL username)<br>
-  Password: Click Store password to set the password of the connection to _YOUR_ password that you use for your MYSQL.
+&Tab;Caption: Localhost 8.0<br>
+&Tab;Host Name or IP Address: localhost<br>
+&Tab;User Name: root (otherwise _YOUR_ MYSQL username)<br>
+&Tab;Password: Click Store password to set the password of the connection to _YOUR_ password that you use for your MYSQL.
 
 After everything, a DB Notebook should be created. Under the tab called Database Connections, all your sql tables that you created should have appeared.
 
@@ -43,7 +43,7 @@ To apply it to the project, same place as Java Projects where you just added mys
 
 Find and change all the code in the classes:
 
-    From: public static final String SQLPassword = "329761";<br>
+    From: public static final String SQLPassword = "329761";
     To: Put your own MYSQL password in there instead of 329761
 
 Best to use the search icon magnifying glass located under the explorer section. Just search "329761" to find it easily.
